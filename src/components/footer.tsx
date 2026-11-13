@@ -14,15 +14,6 @@ const COLS = [
     ],
   },
   {
-    title: "Find",
-    links: [
-      { href: "/research", label: "Research" },
-      { href: "/opportunities", label: "Opportunities" },
-      { href: "/news", label: "News & Events" },
-      { href: "/opportunities/submit", label: "Submit an opportunity" },
-    ],
-  },
-  {
     title: "Stay in touch",
     links: [
       { href: "/join", label: "Join the Digital Communities" },

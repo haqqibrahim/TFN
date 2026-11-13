@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BackLink, DateTile, Photo } from "@/components/cards";
+import { BackLink, Photo } from "@/components/cards";
 import { ChannelButtons } from "@/components/channels";
 import { Arrow, Icon } from "@/components/icons";
-import { db, plain } from "@/lib/db";
-import { fmtDate } from "@/lib/format";
-import { Post, Publication } from "@/lib/models";
-import { upcomingEvents, type PostItem, type PubItem } from "@/lib/queries";
 import { DIVISIONS, PROGRAMMES, programmeBySlug } from "@/lib/site";
-
-export const revalidate = 60;
 
 export function generateStaticParams() {
   return PROGRAMMES.map((p) => ({ slug: p.slug }));
@@ -27,17 +21,6 @@ export default async function ProgrammePage({ params }: { params: Promise<{ slug
   if (!p) notFound();
   const division = DIVISIONS.find((d) => d.slug === p.division);
 
-  await db();
-  const [events, pubs, posts] = await Promise.all([
-    upcomingEvents(20),
-    Publication.find({ status: "published", programme: p.name }).sort({ publishedAt: -1 }).limit(2).lean(),
-    Post.find({ status: "published", programme: p.name }).sort({ publishedAt: -1 }).limit(2).lean(),
-  ]);
-  const next = events.find((e) => e.programme === p.name);
-  const past = [
-    ...(plain(pubs) as unknown as PubItem[]).map((x) => ({ href: `/research/${x.slug}`, kind: x.type, title: x.title, date: x.publishedAt })),
-    ...(plain(posts) as unknown as PostItem[]).map((x) => ({ href: `/news/${x.slug}`, kind: x.category.replace(/s$/, ""), title: x.title, date: x.publishedAt, img: x.image, alt: x.imageAlt })),
-  ].slice(0, 2);
   const others = PROGRAMMES.filter((o) => o.slug !== p.slug && o.slug !== "digital-communities").slice(0, 9)
     .sort((a, b) => Number(b.division === p.division) - Number(a.division === p.division)).slice(0, 3);
   const isTDC = p.slug === "digital-communities";
@@ -108,44 +91,6 @@ export default async function ProgrammePage({ params }: { params: Promise<{ slug
           </ul>
         </div>
       </section>
-
-      {next && (
-        <section className="wrap pb-12 lg:pb-16" aria-labelledby="next">
-          <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-            <h2 id="next" className="h-sec">Coming up</h2>
-            <Link href="/join" className="link text-[15px]">Get notified about future dates</Link>
-          </div>
-          <article className="card p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-5">
-            <DateTile date={next.startsAt} />
-            <div className="flex-1">
-              <h3 className="text-[24px]">{next.theme || next.title}</h3>
-              <p className="mt-1 text-muted flex items-center gap-1.5"><Icon name="pin" size={16} /> {next.venue === "Online" ? "Online" : `${next.venue}, ${next.city}`}</p>
-            </div>
-            <Link href={`/events/${next.slug}`} className="btn btn-navy self-start sm:self-auto">Register to attend <Arrow /></Link>
-          </article>
-        </section>
-      )}
-
-      {past.length > 0 && (
-        <section className="wrap pb-12 lg:pb-16" aria-labelledby="past">
-          <h2 id="past" className="h-sec mb-6">From the programme</h2>
-          <ul className="grid md:grid-cols-2 gap-4">
-            {past.map((x) => (
-              <li key={x.href}>
-                <Link href={x.href} className="group card p-5 flex items-center gap-4 h-full hover:shadow-[0_0_0_2px_var(--color-navy)] transition-shadow">
-                  <span className="w-11 h-11 rounded-[14px] bg-navy text-cream grid place-items-center flex-none"><Icon name="doc" size={20} /></span>
-                  <div className="flex-1">
-                    <span className="text-[14px] font-semibold text-coral-ink">{x.kind}</span>
-                    <h3 className="text-[19px] tracking-[-0.02em] leading-tight">{x.title}</h3>
-                    <p className="mt-1 text-[14px] text-muted">{fmtDate(x.date)}</p>
-                  </div>
-                  <Arrow />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       {!isTDC && (
         <section className="wrap pb-12 lg:pb-16" aria-labelledby="host">

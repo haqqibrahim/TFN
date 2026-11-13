@@ -262,7 +262,7 @@ export async function registerEventAction(_: FormState, fd: FormData): Promise<F
     return { ok: true, message: "already" };
   }
   if (ev.capacity && d.attendance === "In person") {
-    const n = await EventRegistration.countDocuments({ event: ev._id, attendance: "In person" });
+    const n = await EventRegistration.countDocuments({ event: ev._id });
     if (n >= ev.capacity) return { ok: false, values: v, errors: { attendance: "In-person places are full. Choose Online instead." } };
   }
   await EventRegistration.create({ ...d, event: ev._id });

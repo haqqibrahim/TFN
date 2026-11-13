@@ -342,5 +342,6 @@ export async function resetPassword(_: ResetState, fd: FormData): Promise<ResetS
   u.mustChangePassword = true;
   await u.save();
   await log(me.name, `reset the password for ${u.name}`, "/admin/users");
+  refresh("/admin/users");
   return { password };
 }

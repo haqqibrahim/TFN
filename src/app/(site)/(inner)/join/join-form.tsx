@@ -6,8 +6,9 @@ import { joinAction, type FormState } from "@/lib/actions";
 import { JOIN_ROLES, NIGERIAN_STATES } from "@/lib/site";
 import { Check, ChipGroup, ErrorSummary, Field, FormCtx, Honeypot, Submit } from "@/components/form";
 import { TelegramLogo, WhatsAppLogo } from "@/components/icons";
+import { InstitutionPicker } from "@/components/institution-picker";
 
-export function JoinForm() {
+export function JoinForm({ channel = "Both" }: { channel?: "WhatsApp" | "Telegram" | "Both" }) {
   const [state, action] = useActionState<FormState, FormData>(joinAction, {});
   return (
     <FormCtx.Provider value={state}>
@@ -18,17 +19,24 @@ export function JoinForm() {
           <Field name="firstName" label="First name" required autoComplete="given-name" />
           <Field name="email" label="Email address" type="email" required autoComplete="email" inputMode="email" />
         </div>
-        <Field name="whatsapp" label="WhatsApp number" prefix="+234" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="803 123 4567" />
         <div className="grid sm:grid-cols-2 gap-5">
-          <Field name="institution" label="Institution" placeholder="e.g. University of Ibadan" autoComplete="organization" />
-          <Field name="state" label="State" options={NIGERIAN_STATES} />
+          <Field name="whatsapp" label="WhatsApp number" required prefix="+234" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="803 123 4567" />
+          <Field name="state" label="State" required options={NIGERIAN_STATES} />
         </div>
+        <InstitutionPicker />
         <ChipGroup name="role" legend="I am a" options={JOIN_ROLES} required defaultValue="Student" />
         <ChipGroup
-          name="channel"
-          legend="Preferred channel"
+          name="pvc"
+          legend="Do you have a Permanent Voter’s Card (PVC)?"
+          hint="We only ask yes or no. Never send a photo of your PVC to anyone."
           required
-          defaultValue="Both"
+          options={["Yes", "No"]}
+        />
+        <ChipGroup
+          name="channel"
+          legend="Which channel do you want to join?"
+          required
+          defaultValue={channel}
           options={[
             { value: "WhatsApp", label: <><WhatsAppLogo size={20} /> WhatsApp</> },
             { value: "Telegram", label: <><TelegramLogo size={20} /> Telegram</> },
@@ -42,7 +50,7 @@ export function JoinForm() {
             <Link href="/terms#community-standards" className="link">community standards</Link>.
           </Check>
         </div>
-        <Submit className="btn btn-navy w-full sm:w-auto sm:self-start" pending="Registering…">Register</Submit>
+        <Submit className="btn btn-navy w-full sm:w-auto sm:self-start" pending="Registering…">Register and get the links</Submit>
       </form>
     </FormCtx.Provider>
   );

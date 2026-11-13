@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LogoMark } from "@/components/logo";
 import { SignIn } from "./sign-in";
 
-export const metadata: Metadata = { title: "Sign in | TFN Admin", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: { absolute: "Sign in | TFN Admin" }, robots: { index: false, follow: false } };
 
 export default function SignInPage() {
   return (

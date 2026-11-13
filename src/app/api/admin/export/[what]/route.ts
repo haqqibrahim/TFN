@@ -23,9 +23,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ what: st
     const q: Record<string, unknown> = {};
     for (const k of ["institution", "state"]) if (url.searchParams.get(k)) q[k] = url.searchParams.get(k);
     if (url.searchParams.get("channel")) q.channels = url.searchParams.get("channel");
+    const pvc = url.searchParams.get("pvc");
+    if (pvc === "Yes" || pvc === "No") q.pvc = pvc;
     const rows = await JoinRegistration.find(q).sort({ createdAt: -1 }).lean();
-    body = csv([["First name", "Email", "WhatsApp", "Institution", "State", "Role", "Channels", "Email updates", "Joined"],
-      ...rows.map((r) => [r.firstName, r.email, r.whatsapp, r.institution, r.state, r.role, (r.channels || []).join(" and "), r.emailUpdates ? "Yes" : "No", day(r.createdAt)])]);
+    body = csv([["First name", "Email", "WhatsApp", "Institution", "State", "Role", "PVC", "Channels", "Email updates", "Joined"],
+      ...rows.map((r) => [r.firstName, r.email, r.whatsapp, r.institution, r.state, r.role, r.pvc || "Not asked", (r.channels || []).join(" and "), r.emailUpdates ? "Yes" : "No", day(r.createdAt)])]);
     file = `tfn-registrations-${day(new Date())}.csv`;
     await Activity.create({ who: me.name, what: `exported ${rows.length} registrations`, href: "/admin/registrations" });
   } else if (what === "attendees") {

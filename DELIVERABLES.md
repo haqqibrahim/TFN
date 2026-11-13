@@ -41,7 +41,7 @@ The project is delivered in three phases. Each phase has its own Git branch, and
 - Content: write and edit news and publications with a Draft, In review, Approved, Published workflow
 - Opportunity review with four safety checks (real provider, official link, free to apply, valid closing date) before anything is published
 - Inbox for contact and partnership messages: assign, reply, close, download attachments, and log reports of fake channels as incidents
-- Digital Communities registrations: search, filters, partly hidden phone numbers, CSV export (logged) and deletion on request
+- Digital Communities registrations: search, filters (institution, state, channel, PVC), PVC count, partly hidden phone numbers, CSV export (logged) and deletion on request
 - Channels: weekly posting calendar, approval before posting, official channel list and an incident log
 - Events: attendee lists, filters, access needs, door check-in and attendee export
 - Users and roles: add staff, six roles with set permissions, reset passwords, switch accounts off

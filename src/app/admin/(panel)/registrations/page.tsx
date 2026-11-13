@@ -11,7 +11,7 @@ import { Flash, PageHead, Stat, Table, shortDate } from "../ui";
 export const metadata = { title: { absolute: "Registrations | TFN Admin" } };
 const PER = 25;
 
-export default async function Registrations({ searchParams }: { searchParams: Promise<{ q?: string; institution?: string; state?: string; channel?: string; page?: string; done?: string }> }) {
+export default async function Registrations({ searchParams }: { searchParams: Promise<{ q?: string; institution?: string; state?: string; channel?: string; pvc?: string; page?: string; done?: string }> }) {
   const me = await requireAdmin(CAN.registrations);
   const sp = await searchParams;
   await db();
@@ -20,15 +20,17 @@ export default async function Registrations({ searchParams }: { searchParams: Pr
   if (sp.institution) q.institution = sp.institution;
   if (sp.state) q.state = sp.state;
   if (sp.channel) q.channels = sp.channel;
+  if (sp.pvc === "Yes" || sp.pvc === "No") q.pvc = sp.pvc;
   if (sp.q) {
     const rx = { $regex: sp.q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
     q.$or = [{ firstName: rx }, { email: rx }];
   }
   const page = Math.max(1, Number(sp.page) || 1);
   const week = new Date(Date.now() - 7 * 86400000);
-  const [total, thisWeek, institutions, states, matching, rows] = await Promise.all([
+  const [total, thisWeek, withPvc, institutions, states, matching, rows] = await Promise.all([
     JoinRegistration.countDocuments(),
     JoinRegistration.countDocuments({ createdAt: { $gte: week } }),
+    JoinRegistration.countDocuments({ pvc: "Yes" }),
     JoinRegistration.aggregate([{ $group: { _id: "$institution", n: { $sum: 1 } } }, { $sort: { n: -1 } }]),
     JoinRegistration.aggregate([{ $group: { _id: "$state", n: { $sum: 1 } } }, { $sort: { _id: 1 } }]),
     JoinRegistration.countDocuments(q),
@@ -37,11 +39,11 @@ export default async function Registrations({ searchParams }: { searchParams: Pr
   const pages = Math.max(1, Math.ceil(matching / PER));
   const params = (extra: Record<string, string | number>) => {
     const p = new URLSearchParams();
-    for (const k of ["q", "institution", "state", "channel"] as const) if (sp[k]) p.set(k, sp[k]!);
+    for (const k of ["q", "institution", "state", "channel", "pvc"] as const) if (sp[k]) p.set(k, sp[k]!);
     for (const [k, v] of Object.entries(extra)) p.set(k, String(v));
     return p.toString();
   };
-  const filtered = Boolean(sp.q || sp.institution || sp.state || sp.channel);
+  const filtered = Boolean(sp.q || sp.institution || sp.state || sp.channel || sp.pvc);
 
   return (
     <>
@@ -49,14 +51,15 @@ export default async function Registrations({ searchParams }: { searchParams: Pr
         {canManage && <a href={`/api/admin/export/registrations?${params({})}`} className="btn btn-sm btn-navy"><Icon name="download" size={17} /> Export CSV</a>}
       </PageHead>
       <Flash ok={sp.done === "deleted" ? "Registration deleted." : null} />
-      <ul className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-5">
+      <ul className="grid grid-cols-2 xl:grid-cols-5 gap-3 sm:gap-4 mb-5 [&>*:last-child]:col-span-2 xl:[&>*:last-child]:col-span-1">
         <Stat k="Total members" v={total.toLocaleString("en-GB")} />
         <Stat k="Joined this week" v={thisWeek.toLocaleString("en-GB")} />
         <Stat k="Institutions" v={institutions.filter((i) => i._id).length} n={institutions[0]?._id ? `Most from ${institutions[0]._id}` : undefined} />
         <Stat k="States" v={states.filter((s) => s._id).length} n="Out of 37 including the FCT" />
+        <Stat k="Have a PVC" v={withPvc.toLocaleString("en-GB")} n={total ? `${Math.round((withPvc / total) * 100)}% of members` : undefined} />
       </ul>
 
-      <form className="grid sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr_auto] gap-2 mb-4" role="search">
+      <form className="grid sm:grid-cols-2 xl:grid-cols-[1.3fr_1fr_1fr_1fr_1fr_auto] gap-2 mb-4" role="search">
         <div><label htmlFor="q" className="sr-only">Search by name or email</label><input id="q" name="q" defaultValue={sp.q} placeholder="Search by name or email" className="field" /></div>
         <div><label htmlFor="institution" className="sr-only">Institution</label>
           <select id="institution" name="institution" defaultValue={sp.institution || ""} className="field">
@@ -72,11 +75,15 @@ export default async function Registrations({ searchParams }: { searchParams: Pr
           <select id="channel" name="channel" defaultValue={sp.channel || ""} className="field">
             <option value="">Any channel</option><option>WhatsApp</option><option>Telegram</option>
           </select></div>
+        <div><label htmlFor="pvc" className="sr-only">PVC</label>
+          <select id="pvc" name="pvc" defaultValue={sp.pvc || ""} className="field">
+            <option value="">PVC: any</option><option value="Yes">Has a PVC</option><option value="No">No PVC</option>
+          </select></div>
         <div className="flex gap-2"><button className="btn btn-sm btn-navy !min-h-12 flex-1">Filter</button>{filtered && <Link href="/admin/registrations" className="btn btn-sm btn-line !min-h-12">Clear</Link>}</div>
       </form>
 
       <p className="text-[14px] text-muted mb-2">{matching.toLocaleString("en-GB")} {matching === 1 ? "person" : "people"}{filtered ? " match" : ""}</p>
-      <Table head={["Name", "Email", "WhatsApp", "Institution", "State", "Channels", "Joined", ...(canManage ? [""] : [])]} empty={rows.length ? undefined : "No one matches these filters."}>
+      <Table head={["Name", "Email", "WhatsApp", "Institution", "State", "PVC", "Channels", "Joined", ...(canManage ? [""] : [])]} empty={rows.length ? undefined : "No one matches these filters."}>
         {rows.map((r) => (
           <tr key={String(r._id)}>
             <td className="font-semibold whitespace-nowrap">{r.firstName}</td>
@@ -84,6 +91,7 @@ export default async function Registrations({ searchParams }: { searchParams: Pr
             <td className="whitespace-nowrap font-mono text-[14px]">{maskPhone(r.whatsapp)}</td>
             <td className="max-w-[220px] truncate">{r.institution}</td>
             <td className="whitespace-nowrap">{r.state}</td>
+            <td className="whitespace-nowrap">{r.pvc || "Not asked"}</td>
             <td className="whitespace-nowrap">{(r.channels || []).join(", ")}</td>
             <td className="text-muted whitespace-nowrap">{shortDate(r.createdAt)}</td>
             {canManage && (

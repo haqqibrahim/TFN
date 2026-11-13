@@ -476,14 +476,17 @@ The condition for all four: publish what comes in and where it goes.`,
   const regs = [];
   for (const [ev, n] of [[dialogue, 312], [forum, 160], [campus, 41], [academy, 87]] as const) {
     for (let i = 0; i < n; i++) {
-      const nm = names[i % names.length];
+      const first = names[i % names.length].split(" ")[0];
+      const last = names[(i * 7 + Math.floor(i / names.length)) % names.length].split(" ")[1];
+      const nm = `${first} ${last}`;
       regs.push({
         event: ev._id,
         name: nm,
-        email: `${nm.toLowerCase().replace(/\s+/g, ".")}${i}@example.com`,
+        email: `${first}.${last}${i}@example.com`.toLowerCase(),
         institution: insts[i % insts.length],
         role: i % 4 === 0 ? "Academic staff" : "Student",
-        attendance: i % 3 === 0 ? "Online" : "In person",
+        attendance: ev.venue === "Online" || i % 3 === 0 ? "Online" : "In person",
+        access: i % 23 === 5 ? "Step-free access, please" : i % 31 === 9 ? "Live captions" : "",
         createdAt: daysAgo(i % 30),
       });
     }

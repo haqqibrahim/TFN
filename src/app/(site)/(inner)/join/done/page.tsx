@@ -4,7 +4,7 @@ import { ChannelButtons } from "@/components/channels";
 import { CopyButton } from "@/components/copy-button";
 import { Icon, WhatsAppLogo } from "@/components/icons";
 import { deleteJoinAction } from "@/lib/actions";
-import { COMMUNITY_LINKS, currentMember } from "@/lib/member";
+import { communityLinks, currentMember } from "@/lib/member";
 
 export const metadata: Metadata = { title: "You’re registered", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function JoinDone() {
   const member = await currentMember();
   if (!member) redirect("/join#register");
+  const COMMUNITY_LINKS = await communityLinks();
   const name = member.firstName.slice(0, 40);
   const chosen = member.channels?.length ? member.channels : ["WhatsApp", "Telegram"];
   const other = chosen.length === 1 ? (chosen[0] === "WhatsApp" ? "Telegram" : "WhatsApp") : null;

@@ -51,6 +51,7 @@ export const CAN = {
   events: ["Super admin", "Events lead"] as Role[],
   inbox: ["Super admin", "Editor", "Reviewer", "Channels lead", "Events lead"] as Role[],
   registrations: ["Super admin", "Channels lead"] as Role[],
+  links: ["Super admin", "Channels lead"] as Role[],
   users: ["Super admin"] as Role[],
 };
 

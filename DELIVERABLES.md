@@ -42,7 +42,7 @@ The project is delivered in three phases. Each phase has its own Git branch, and
 - Opportunity review with four safety checks (real provider, official link, free to apply, valid closing date) before anything is published
 - Inbox for contact and partnership messages: assign, reply, close, download attachments, and log reports of fake channels as incidents
 - Digital Communities registrations: search, filters (institution, state, channel, PVC), PVC count, partly hidden phone numbers, CSV export (logged) and deletion on request
-- Channels: weekly posting calendar, approval before posting, official channel list and an incident log
+- Channels: weekly posting calendar, approval before posting, official channel list, an incident log, and the WhatsApp, Telegram and help-group links members get after registering (Super admin and Channels lead only, checked to be real WhatsApp or Telegram links)
 - Events: attendee lists, filters, access needs, door check-in and attendee export
 - Users and roles: add staff, six roles with set permissions, reset passwords, switch accounts off
 - Activity log of who did what

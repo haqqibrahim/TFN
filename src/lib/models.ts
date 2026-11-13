@@ -231,6 +231,17 @@ const IncidentSchema = new Schema(
 );
 export const Incident = model("Incident", IncidentSchema);
 
+/** Site-wide settings changed from the admin panel, one document per key. */
+const SettingSchema = new Schema(
+  {
+    key: { type: String, required: true, unique: true },
+    value: Schema.Types.Mixed,
+    updatedBy: String,
+  },
+  opts,
+);
+export const Setting = model("Setting", SettingSchema);
+
 /* ---------- Admin ---------- */
 
 export const ROLES = ["Super admin", "Editor", "Reviewer", "Channels lead", "Events lead", "Viewer"] as const;

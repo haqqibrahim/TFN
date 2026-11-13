@@ -1,17 +1,22 @@
 import Link from "next/link";
 import { Icon, WhatsAppLogo, TelegramLogo, XLogo, LinkedInLogo, InstagramLogo } from "@/components/icons";
-import { saveChannelPost, saveChannelPostAs, saveIncident } from "@/lib/admin-actions";
-import { requireAdmin } from "@/lib/auth";
+import { saveChannelPost, saveChannelPostAs, saveCommunityLinks, saveIncident } from "@/lib/admin-actions";
+import { allowed, requireAdmin } from "@/lib/auth";
+import { communityLinks } from "@/lib/member";
 import { db } from "@/lib/db";
-import { Channel, ChannelPost, Incident } from "@/lib/models";
+import { Channel, ChannelPost, Incident, Setting } from "@/lib/models";
 import { Back, Flash, PageHead, Panel, Status, ago, shortDate } from "../ui";
 
 export const metadata = { title: { absolute: "Channels | TFN Admin" } };
 
 const PLATFORMS = ["WhatsApp", "Telegram", "X", "LinkedIn", "Instagram"] as const;
 const LOGO: Record<string, (p: { size?: number }) => React.ReactNode> = { WhatsApp: WhatsAppLogo, Telegram: TelegramLogo, X: XLogo, LinkedIn: LinkedInLogo, Instagram: InstagramLogo };
-const DONE: Record<string, string> = { saved: "Saved.", submit: "Sent for approval.", approve: "Approved and scheduled.", back: "Sent back to draft.", posted: "Marked as posted." };
-const ERR: Record<string, string> = { approve: "Only a reviewer or super administrator can approve posts.", own: "Someone else needs to approve a post you wrote." };
+const DONE: Record<string, string> = { saved: "Saved.", submit: "Sent for approval.", approve: "Approved and scheduled.", back: "Sent back to draft.", posted: "Marked as posted.", links: "Join links saved. Registered members see them straight away." };
+const ERR: Record<string, string> = { approve: "Only a reviewer or super administrator can approve posts.", own: "Someone else needs to approve a post you wrote.",
+  "link-whatsapp": "The WhatsApp link must be an https link on whatsapp.com, chat.whatsapp.com or wa.me.",
+  "link-telegram": "The Telegram link must be an https link on t.me or telegram.me.",
+  "link-help": "The help group link must be an https link on t.me, telegram.me or chat.whatsapp.com.",
+};
 const DAY = 86400000;
 const LAGOS = 3600000; // UTC+1, no daylight saving
 
@@ -39,12 +44,15 @@ export default async function Channels({ searchParams }: { searchParams: Promise
   const monday = new Date(Date.UTC(nowLagos.getUTCFullYear(), nowLagos.getUTCMonth(), nowLagos.getUTCDate() - dow + offset * 7) - LAGOS);
   const sunday = new Date(monday.getTime() + 7 * DAY);
 
-  const [week, waiting, channels, incidents, selected] = await Promise.all([
+  const canLinks = allowed(me.role, "links");
+  const [week, waiting, channels, incidents, selected, links, linkSetting] = await Promise.all([
     ChannelPost.find({ scheduledFor: { $gte: monday, $lt: sunday } }).sort({ scheduledFor: 1 }).lean(),
     ChannelPost.find({ status: "review" }).sort({ scheduledFor: 1 }).lean(),
     Channel.find().sort({ members: -1 }).lean(),
     Incident.find().sort({ status: -1, createdAt: -1 }).limit(12).lean(),
     sp.id && /^[a-f0-9]{24}$/.test(sp.id) ? ChannelPost.findById(sp.id).lean() : null,
+    canLinks ? communityLinks() : null,
+    canLinks ? Setting.findOne({ key: "communityLinks" }).lean<{ value?: Record<string, string>; updatedBy?: string; updatedAt?: Date }>() : null,
   ]);
   const days = Array.from({ length: 7 }, (_, i) => new Date(monday.getTime() + i * DAY));
   const todayKey = new Date(Date.now() + LAGOS).toISOString().slice(0, 10);
@@ -130,6 +138,8 @@ export default async function Channels({ searchParams }: { searchParams: Promise
           </ul>
         </Panel>
       </div>
+
+      {links && <JoinLinks links={links} saved={linkSetting?.value || {}} by={linkSetting?.updatedBy} at={linkSetting?.updatedAt} />}
 
       <section id="incidents" className="mt-5 scroll-mt-6">
         <Panel title="Incidents" action={<span className="text-[14px] text-muted">Fake groups, scams and impersonation</span>}>
@@ -219,5 +229,41 @@ function PostEditor({ p, canApprove }: { p: any; canApprove: boolean }) {
         </div>
       </form>
     </Panel>
+  );
+}
+
+function JoinLinks({ links, saved, by, at }: { links: Awaited<ReturnType<typeof communityLinks>>; saved: Record<string, string>; by?: string; at?: Date }) {
+  const rows = [
+    { k: "whatsapp", label: "WhatsApp Channel", Logo: WhatsAppLogo, ph: "https://whatsapp.com/channel/0029Va…" },
+    { k: "telegram", label: "Telegram Channel", Logo: TelegramLogo, ph: "https://t.me/tfnetwork" },
+    { k: "help", label: "Help group", Logo: TelegramLogo, ph: "https://t.me/+AbCdEf…" },
+  ] as const;
+  const missing = links.placeholder.length;
+  return (
+    <section id="join-links" className="mt-5 scroll-mt-6">
+      <Panel title="Join links" action={by && at ? <span className="text-[14px] text-muted">Changed by {by}, {ago(at)}</span> : undefined}>
+        <p className="text-muted -mt-1 mb-4 max-w-[60ch]">Where people go after registering on the Join page. Only registered members ever see these.</p>
+        {missing > 0 && (
+          <p className="mb-4 rounded-[14px] bg-coral-tint/60 px-4 py-3 text-[15px]">
+            {missing === 3 ? "No real links yet." : `${missing} of 3 links not set.`} Members are sent to placeholder links until you add them.
+          </p>
+        )}
+        <form action={saveCommunityLinks} className="grid gap-4">
+          {rows.map(({ k, label, Logo, ph }) => (
+            <div key={k} className="grid sm:grid-cols-[200px_1fr] gap-2 sm:gap-4 sm:items-center">
+              <label htmlFor={`l-${k}`} className="label !mb-0 flex items-center gap-2"><Logo size={20} /> {label}</label>
+              <div className="min-w-0">
+                <input id={`l-${k}`} name={k} type="url" inputMode="url" defaultValue={saved[k] || ""} placeholder={ph} className="field" />
+                {links.placeholder.includes(k) ? <p className="hint">Not set. Using a placeholder.</p> : !saved[k] ? <p className="hint">Set on the server. Saving a link here replaces it.</p> : null}
+              </div>
+            </div>
+          ))}
+          <div className="flex flex-wrap items-center gap-3 sm:pl-[216px]">
+            <button className="btn btn-sm btn-navy">Save links</button>
+            <span className="text-[14px] text-muted">Leave a box empty to go back to the placeholder.</span>
+          </div>
+        </form>
+      </Panel>
+    </section>
   );
 }

@@ -7,9 +7,10 @@ import { redirect } from "next/navigation";
 import { allowed, requireAdmin } from "./auth";
 import { db } from "./db";
 import { slugify } from "./format";
+import { validLink, type CommunityLinks } from "./member";
 import {
   Activity, AdminUser, ChannelPost, CHANNEL_STATUSES, Enquiry, ENQUIRY_STATUSES, Event, EventRegistration, Incident,
-  JoinRegistration, NEWS_CATEGORIES, Opportunity, OPP_CATEGORIES, Post, POST_STATUSES, Publication, PUB_TYPES, ROLES, type Role,
+  JoinRegistration, NEWS_CATEGORIES, Setting, Opportunity, OPP_CATEGORIES, Post, POST_STATUSES, Publication, PUB_TYPES, ROLES, type Role,
 } from "./models";
 
 type K = Parameters<typeof allowed>[1];
@@ -185,6 +186,23 @@ export async function saveChannelPost(fd: FormData) {
   if (intent) await log(me.name, `${intent === "approve" ? "approved" : intent === "submit" ? "sent for approval" : intent === "back" ? "sent back" : intent === "posted" ? "marked as posted" : "updated"} “${p.title}”`, `/admin/channels?id=${p._id}`);
   refresh("/admin/channels");
   redirect(`/admin/channels?id=${p._id}&done=${intent || "saved"}`);
+}
+
+export async function saveCommunityLinks(fd: FormData) {
+  const me = await gate("links");
+  const value: Partial<CommunityLinks> = {};
+  const bad: string[] = [];
+  for (const k of ["whatsapp", "telegram", "help"] as const) {
+    const v = str(fd, k);
+    if (!v) continue; // empty: fall back to the placeholder
+    if (!validLink(k, v)) bad.push(k);
+    else value[k] = v;
+  }
+  if (bad.length) redirect(`/admin/channels?err=link-${bad[0]}#join-links`);
+  await Setting.findOneAndUpdate({ key: "communityLinks" }, { value, updatedBy: me.name }, { upsert: true });
+  await log(me.name, "changed the community join links", "/admin/channels#join-links");
+  refresh("/admin/channels", "/join", "/join/done");
+  redirect("/admin/channels?done=links#join-links");
 }
 
 export async function saveIncident(fd: FormData) {

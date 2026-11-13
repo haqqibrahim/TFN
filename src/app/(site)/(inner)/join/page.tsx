@@ -4,7 +4,7 @@ import { Photo } from "@/components/cards";
 import { ChannelButtons } from "@/components/channels";
 import { Faqs } from "@/components/faqs";
 import { Arrow, Icon, type IconName } from "@/components/icons";
-import { COMMUNITY_LINKS, currentMember } from "@/lib/member";
+import { communityLinks, currentMember } from "@/lib/member";
 import { SITE } from "@/lib/site";
 import { JoinForm } from "./join-form";
 
@@ -52,6 +52,7 @@ export default async function JoinPage({ searchParams }: { searchParams: Promise
   const { channel } = await searchParams;
   const pick: Channel = channel === "WhatsApp" || channel === "Telegram" ? channel : "Both";
   const member = await currentMember();
+  const COMMUNITY_LINKS = member ? await communityLinks() : null;
   return (
     <>
       <section className="wrap pt-6 lg:pt-10 pb-8 grid lg:grid-cols-[1.1fr_1fr] gap-6 lg:gap-10 items-center">
@@ -68,7 +69,7 @@ export default async function JoinPage({ searchParams }: { searchParams: Promise
             <Step n={1} title={`You’re registered, ${member.firstName}`}>
               <p className="mt-2 text-muted">These are TFN’s official channels. Follow one or both.</p>
               <div className="mt-5 grid sm:grid-cols-2 gap-3">
-                <ChannelButtons variant="line" full links={COMMUNITY_LINKS} />
+                <ChannelButtons variant="line" full links={COMMUNITY_LINKS!} />
               </div>
               <p className="mt-4 text-[15px] text-muted">
                 Free. Unfollow any time. <Link href="/join/done" className="link">Manage your registration</Link>
@@ -100,7 +101,7 @@ export default async function JoinPage({ searchParams }: { searchParams: Promise
             <p className="mt-2 text-muted">Questions and discussion happen in small moderated spaces, never the channel.</p>
             <div className="mt-5 flex flex-wrap gap-3">
               {member && (
-                <a href={COMMUNITY_LINKS.help} target="_blank" rel="noopener noreferrer" className="btn btn-line">Join a community space <Arrow /></a>
+                <a href={COMMUNITY_LINKS?.help} target="_blank" rel="noopener noreferrer" className="btn btn-line">Join a community space <Arrow /></a>
               )}
               <Link href="/contact?topic=Digital%20Communities" className="btn btn-line">Contact support</Link>
             </div>

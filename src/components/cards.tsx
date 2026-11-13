@@ -132,10 +132,11 @@ export function PubCard({ p }: { p: PubItem }) {
         <Link href={`/research/${p.slug}`} className="after:absolute after:inset-0">{p.title}</Link>
       </h3>
       <div className="mt-auto pt-5 flex items-center gap-2.5 text-[14px]">
-        {a && <Avatar name={a.name} size={30} />}
-        <span className="font-medium">{a?.name}</span>
-        <span className="ml-auto text-muted whitespace-nowrap">{fmtDate(p.publishedAt, "short")}</span>
-        {p.readMinutes && <span className="text-muted whitespace-nowrap">{p.readMinutes} min</span>}
+        {a && <Avatar name={a.name} size={34} />}
+        <span className="min-w-0">
+          <span className="block font-medium truncate">{a?.name}</span>
+          <span className="block text-muted">{fmtDate(p.publishedAt, "short")}{p.readMinutes ? `, ${p.readMinutes} min read` : ""}</span>
+        </span>
       </div>
     </article>
   );

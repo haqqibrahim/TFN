@@ -95,7 +95,7 @@ export default function JoinPage() {
                 </li>
               ))}
             </ul>
-            <Link href="/contact?topic=Report%20a%20fake%20channel" className="mt-5 btn btn-white w-full">Report a suspicious channel</Link>
+            <Link href="/contact?topic=Digital%20Communities&fake=1" className="mt-5 btn btn-white w-full">Report a suspicious channel</Link>
           </section>
           <p className="text-[14px] text-muted px-1">
             Joining is free and is not TFN membership. Questions? Email <a className="link" href={`mailto:${SITE.email}`}>{SITE.email}</a>.

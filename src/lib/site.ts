@@ -291,9 +291,18 @@ export const NIGERIAN_STATES = [
 
 export const JOIN_ROLES = ["Student", "Graduate", "Academic or staff", "Other"];
 
-export const CONTACT_TOPICS = [
-  "General enquiry", "Programmes", "Partnerships", "Research", "Opportunities", "Media", "Digital Communities", "Report a fake channel",
-];
+export const CONTACT_TOPICS = ["General", "Programmes", "Digital Communities", "Membership", "Research", "Partnerships", "Media", "Privacy"];
+
+export const PARTNER_TYPES = [
+  { name: "Tertiary institutions", line: "Campus engagement, research, student development, policy dialogue.", icon: "building" },
+  { name: "Government and public institutions", line: "Policy dialogue, research, public programmes.", icon: "policy" },
+  { name: "Private sector", line: "Internships, leadership development, enterprise, sponsorship.", icon: "briefcase" },
+  { name: "Development partners", line: "Capacity building, youth and education initiatives.", icon: "handshake" },
+  { name: "International institutions", line: "Exchanges, joint research, international dialogue.", icon: "globe" },
+  { name: "Research and professional bodies", line: "Joint studies, conferences, expert contributions.", icon: "research" },
+] as const;
+
+export const PARTNER_AREAS = ["Programme delivery", "Research", "Events", "Institutional engagement", "Learning", "Opportunities", "Digital"];
 
 export const OPP_ICONS: Record<string, IconName> = {
   Scholarships: "cap",

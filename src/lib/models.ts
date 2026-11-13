@@ -86,7 +86,7 @@ const OpportunitySchema = new Schema(
     contactEmail: String,
     submitterName: String,
     submitterEmail: String,
-    attachment: String,
+    attachment: { type: Schema.Types.ObjectId, ref: "Upload" },
     checks: {
       provider: { type: Boolean, default: false },
       link: { type: Boolean, default: false },
@@ -177,6 +177,9 @@ const EnquirySchema = new Schema(
     message: { type: String, required: true },
     status: { type: String, enum: ENQUIRY_STATUSES, default: "new" },
     assignee: String,
+    orgType: String,
+    website: String,
+    attachment: { type: Schema.Types.ObjectId, ref: "Upload" },
     notes: [{ by: String, text: String, at: Date }],
   },
   opts,
@@ -259,3 +262,15 @@ const ActivitySchema = new Schema(
 export const Activity = model("Activity", ActivitySchema);
 
 export type Plain<T> = T & { _id: string; createdAt: string; updatedAt: string };
+
+/* ---------- Uploaded files (attachments from public forms) ---------- */
+const UploadSchema = new Schema(
+  {
+    name: String,
+    type: String,
+    size: Number,
+    data: Buffer,
+  },
+  opts,
+);
+export const Upload = model("Upload", UploadSchema);

@@ -27,7 +27,7 @@ const COLS = [
     links: [
       { href: "/join", label: "Join the Digital Communities" },
       { href: "/contact", label: "Contact us" },
-      { href: "/contact?topic=Report%20a%20fake%20channel", label: "Report a fake channel" },
+      { href: "/contact?topic=Digital%20Communities&fake=1", label: "Report a fake channel" },
       { href: "/contact?topic=Media", label: "Media enquiries" },
     ],
   },

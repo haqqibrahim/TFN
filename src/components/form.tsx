@@ -147,7 +147,7 @@ export function Honeypot() {
     <div aria-hidden="true" className="absolute -left-[9999px] w-px h-px overflow-hidden">
       <label>
         Leave this empty
-        <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        <input type="text" name="hp_url" tabIndex={-1} autoComplete="off" />
       </label>
     </div>
   );

@@ -3,6 +3,8 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { JoinStrip } from "@/components/join-strip";
 
+export const metadata = { title: "Page not found" };
+
 export default function NotFound() {
   return (
     <>

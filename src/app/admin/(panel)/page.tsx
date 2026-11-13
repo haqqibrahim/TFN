@@ -6,7 +6,7 @@ import { fmtDate } from "@/lib/format";
 import { Activity, ChannelPost, Enquiry, Incident, JoinRegistration, Opportunity, Post, Publication } from "@/lib/models";
 import { Panel, Status, Who, ago } from "./ui";
 
-export const metadata = { title: "Dashboard" };
+export const metadata = { title: { absolute: "Dashboard | TFN Admin" } };
 
 const WEEK = 7 * 86400000;
 
@@ -40,6 +40,12 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const max = Math.max(1, ...series.map((s) => s.n));
   const change = lastWeek ? Math.round(((thisWeek - lastWeek) / lastWeek) * 100) : null;
   const waiting = pendingOpps.length + reviewPosts.length + reviewNews.length + reviewPubs.length;
+  const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+  const waitingNote = [
+    pendingOpps.length && plural(pendingOpps.length, "opportunity", "opportunities"),
+    reviewPosts.length && plural(reviewPosts.length, "channel post", "channel posts"),
+    reviewNews.length + reviewPubs.length && plural(reviewNews.length + reviewPubs.length, "story or paper", "stories and papers"),
+  ].filter(Boolean).join(", ");
   const ch = Object.fromEntries(byChannel.map((c) => [c._id, c.n]));
   const hour = Number(new Date().toLocaleString("en-GB", { hour: "numeric", hour12: false, timeZone: "Africa/Lagos" }));
   const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -75,8 +81,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
       <ul className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-5">
         {[
-          { k: "New registrations this week", v: thisWeek.toLocaleString("en-GB"), n: change === null ? "First week of data" : `${change >= 0 ? "Up" : "Down"} ${Math.abs(change)}% on last week`, href: "/admin/registrations" },
-          { k: "Waiting for your approval", v: waiting, n: `${pendingOpps.length} opportunities, ${reviewPosts.length} channel posts`, href: "/admin/opportunities" },
+          { k: "New registrations this week", v: thisWeek.toLocaleString("en-GB"), n: change === null ? "First week of data" : change === 0 ? "Same as last week" : `${change > 0 ? "Up" : "Down"} ${Math.abs(change)}% on last week`, href: "/admin/registrations" },
+          { k: "Waiting for your approval", v: waiting, n: waitingNote || "Nothing waiting", href: "/admin/opportunities" },
           { k: "Opportunities closing in 7 days", v: closing.length, n: closing[0] ? `Next: ${fmtDate(closing[0].closesAt, "short")}` : "None this week", href: "/admin/opportunities?tab=published" },
           { k: "New messages", v: newInbox, n: `${incidents.length} open ${incidents.length === 1 ? "incident" : "incidents"}`, href: "/admin/inbox" },
         ].map((s) => (
@@ -90,7 +96,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         ))}
       </ul>
 
-      <div className="grid xl:grid-cols-[1.4fr_1fr] gap-5">
+      <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-5 [&>*]:min-w-0">
         <Panel title="Digital Communities registrations" action={<Link href="/admin/registrations" className="btn btn-sm btn-line">Full report</Link>}>
           <figure>
             <div className="flex items-end gap-2 sm:gap-3 h-[200px]" role="img" aria-label={`Weekly registrations for the last 8 weeks: ${series.map((s) => s.n).join(", ")}`}>
@@ -114,7 +120,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
         <Panel title="Needs your attention">
           {attention.length ? (
-            <ul className="grid gap-2.5">
+            <ul className="grid grid-cols-1 gap-2.5 [&>li]:min-w-0">
               {attention.map((a) => (
                 <li key={a.href} className="flex items-center gap-3 rounded-[14px] border border-adminline p-3">
                   <div className="flex-1 min-w-0">
@@ -133,7 +139,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
       </div>
 
       <Panel title="Recent activity" className="mt-5">
-        <ul className="grid gap-3">
+        <ul className="grid grid-cols-1 gap-3 [&>li]:min-w-0">
           {activity.map((a) => (
             <li key={String(a._id)} className="flex items-center gap-3 text-[15px]">
               <Who name={a.who || ""} />

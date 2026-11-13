@@ -82,7 +82,7 @@ export function Tabs({ items, current }: { items: { href: string; label: string;
 
 export function Table({ head, children, empty }: { head: string[]; children: React.ReactNode; empty?: string }) {
   return (
-    <div className="bg-white rounded-[20px] border border-adminline overflow-x-auto">
+    <div className="relative bg-white rounded-[20px] border border-adminline overflow-x-auto">
       <table className="w-full text-[15px] min-w-[720px]">
         <thead>
           <tr className="text-left text-[13px] text-muted border-b border-adminline">

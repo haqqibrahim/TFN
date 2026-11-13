@@ -60,7 +60,7 @@ export default async function Channels({ searchParams }: { searchParams: Promise
 
       {editing && (
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        <PostEditor p={editing as any} canApprove={canApprove} me={me.name} />
+        <PostEditor p={editing as any} canApprove={canApprove} />
       )}
 
       <Panel title={offset === 0 ? "This week" : `Week of ${shortDate(days[0])}`} action={
@@ -166,7 +166,7 @@ export default async function Channels({ searchParams }: { searchParams: Promise
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function PostEditor({ p, canApprove, me }: { p: any; canApprove: boolean; me: string }) {
+function PostEditor({ p, canApprove }: { p: any; canApprove: boolean }) {
   const id = p._id ? String(p._id) : "";
   const checks = [
     "Links go to tfnetwork.org or an official partner site",

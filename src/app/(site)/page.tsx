@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DateTile, Photo, ProgrammeCard, SectionHead } from "@/components/cards";
+import { Photo, ProgrammeCard, SectionHead } from "@/components/cards";
 import { ChannelButtons } from "@/components/channels";
 import { CopyButton } from "@/components/copy-button";
 import { Header } from "@/components/header";

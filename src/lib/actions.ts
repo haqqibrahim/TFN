@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "./db";
-import { Activity, Enquiry, JoinRegistration, Upload } from "./models";
+import { Activity, Enquiry, Event, EventRegistration, JoinRegistration, Opportunity, OPP_CATEGORIES, Upload } from "./models";
+import { slugify } from "./format";
 
 export type FormState = {
   ok?: boolean;
@@ -185,3 +186,87 @@ export async function partnershipAction(_: FormState, fd: FormData): Promise<For
   return { ok: true, message: d.name.split(" ")[0] };
 }
 
+/* ---------- Submit an opportunity ---------- */
+
+const OppSchema = z
+  .object({
+    provider: req("Enter the organisation offering this").max(150),
+    title: req("Enter the name of the opportunity").max(150),
+    category: z.enum(OPP_CATEGORIES, { message: "Choose a category" }),
+    location: req("Choose where it takes place"),
+    description: z.string().trim().min(30, "Describe it in a few sentences (at least 30 characters)").max(5000),
+    eligibility: z.string().trim().min(5, "Say who can apply").max(3000),
+    opensAt: z.string().optional(),
+    closesAt: req("Enter the closing date"),
+    applyUrl: z.string().trim().url("Enter the full link, starting with https://"),
+    submitterEmail: email,
+    consent: z.literal("on", { message: "Tick this box so we can review your submission" }),
+  })
+  .refine((d) => new Date(d.closesAt) > new Date(), { path: ["closesAt"], message: "The closing date must be in the future" });
+
+export async function submitOpportunityAction(_: FormState, fd: FormData): Promise<FormState> {
+  const v = values(fd);
+  if (isBot(fd)) return { ok: true };
+  const parsed = OppSchema.safeParse(v);
+  if (!parsed.success) return fail(parsed.error, v);
+  const up = await saveUpload(fd);
+  if (up.error) return { ok: false, errors: { file: up.error }, values: v, message: "Check the highlighted fields." };
+  const d = parsed.data;
+  await db();
+  let slug = slugify(d.title);
+  if (await Opportunity.exists({ slug })) slug = `${slug}-${crypto.randomBytes(3).toString("hex")}`;
+  await Opportunity.create({
+    slug,
+    title: d.title,
+    provider: d.provider,
+    category: d.category,
+    location: d.location,
+    description: d.description,
+    summary: d.description.slice(0, 140),
+    eligibility: d.eligibility.split(/\n+/).map((s) => s.replace(/^[-•*]\s*/, "").trim()).filter(Boolean),
+    opensAt: d.opensAt ? new Date(d.opensAt) : undefined,
+    closesAt: new Date(d.closesAt + "T22:59:00Z"),
+    applyUrl: d.applyUrl,
+    submitterName: d.provider,
+    submitterEmail: d.submitterEmail,
+    attachment: up.id,
+    status: "pending",
+  });
+  await Activity.create({ who: d.provider, what: `submitted “${d.title}” for review`, href: "/admin/opportunities" });
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/* ---------- Event registration ---------- */
+
+const RegSchema = z.object({
+  name: req("Enter your full name").max(100),
+  email,
+  institution: z.string().trim().max(150).optional(),
+  role: z.string().trim().optional(),
+  attendance: z.enum(["In person", "Online"], { message: "Choose how you’ll attend" }),
+  access: z.string().trim().max(1000).optional(),
+  privacy: z.literal("on", { message: "Confirm you have read the privacy notice" }),
+});
+
+export async function registerEventAction(_: FormState, fd: FormData): Promise<FormState> {
+  const v = values(fd);
+  if (isBot(fd)) return { ok: true };
+  const parsed = RegSchema.safeParse(v);
+  if (!parsed.success) return fail(parsed.error, v);
+  const d = parsed.data;
+  await db();
+  const ev = await Event.findOne({ slug: String(v.event), status: "published" });
+  if (!ev) return { ok: false, message: "Registration for this event has closed.", values: v };
+  if (await EventRegistration.exists({ event: ev._id, email: d.email })) {
+    return { ok: true, message: "already" };
+  }
+  if (ev.capacity && d.attendance === "In person") {
+    const n = await EventRegistration.countDocuments({ event: ev._id });
+    if (n >= ev.capacity) return { ok: false, values: v, errors: { attendance: "In-person places are full. Choose Online instead." } };
+  }
+  await EventRegistration.create({ ...d, event: ev._id });
+  revalidatePath(`/events/${ev.slug}`);
+  revalidatePath("/");
+  return { ok: true, message: d.name.split(" ")[0] };
+}

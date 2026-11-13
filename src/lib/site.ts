@@ -17,6 +17,9 @@ export const SITE = {
 export const NAV = [
   { href: "/about", label: "About TFN" },
   { href: "/programmes", label: "Programmes" },
+  { href: "/research", label: "Research" },
+  { href: "/opportunities", label: "Opportunities" },
+  { href: "/news", label: "News & Events" },
   { href: "/partners", label: "Partners" },
   { href: "/contact", label: "Contact" },
 ];
@@ -75,7 +78,7 @@ export const PROGRAMMES: Programme[] = [
       { name: "Stakeholder consultations", line: "Your views gathered on live policy questions." },
       { name: "Thematic discussions", line: "A season of sessions around one theme." },
     ],
-    primary: { label: "Ask about the next forum", href: "/contact?topic=Programmes" },
+    primary: { label: "Take part in a forum", href: "/events/national-tertiary-policy-dialogue-2027" },
     secondary: { label: "Propose a topic", href: "/contact?topic=Programmes" },
   },
   {
@@ -141,7 +144,7 @@ export const PROGRAMMES: Programme[] = [
       { name: "Institutional reports", line: "What is happening inside institutions, documented." },
       { name: "Opinion", line: "Considered arguments from people in the sector." },
     ],
-    primary: { label: "Work with our researchers", href: "/contact?topic=Research" },
+    primary: { label: "Read publications", href: "/research" },
     secondary: { label: "Submit research", href: "/contact?topic=Research" },
   },
   {
@@ -163,8 +166,8 @@ export const PROGRAMMES: Programme[] = [
       { name: "Grants and enterprise", line: "Support for ideas and young businesses." },
       { name: "Training and competitions", line: "Skills courses and national challenges." },
     ],
-    primary: { label: "Get opportunities on your phone", href: "/join" },
-    secondary: { label: "Share an opportunity with us", href: "/partners#enquiry" },
+    primary: { label: "Explore opportunities", href: "/opportunities" },
+    secondary: { label: "Submit an opportunity", href: "/opportunities/submit" },
   },
   {
     slug: "global-network",
@@ -229,7 +232,7 @@ export const PROGRAMMES: Programme[] = [
       { name: "Policy summaries", line: "Short notes for ministries and agencies." },
       { name: "Follow-up engagement", line: "Recommendations taken to the people who decide." },
     ],
-    primary: { label: "Get updates on the Dialogue", href: "/join" },
+    primary: { label: "Register for the Dialogue", href: "/events/national-tertiary-policy-dialogue-2027" },
     secondary: { label: "Propose a theme", href: "/contact?topic=Programmes" },
   },
   {

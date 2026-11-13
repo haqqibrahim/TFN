@@ -16,8 +16,8 @@ export default function NotFound() {
         <p className="mt-4 lede text-muted">It may have moved, or the link may be wrong. These might help:</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/" className="btn btn-navy">Home page</Link>
-          <Link href="/programmes" className="btn btn-line">Programmes</Link>
-          <Link href="/join" className="btn btn-line">Join the Digital Communities</Link>
+          <Link href="/opportunities" className="btn btn-line">Opportunities</Link>
+          <Link href="/news" className="btn btn-line">News & Events</Link>
           <Link href="/contact" className="btn btn-line">Contact us</Link>
         </div>
       </main>

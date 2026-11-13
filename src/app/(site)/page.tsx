@@ -3,8 +3,12 @@ import { Photo, ProgrammeCard, SectionHead } from "@/components/cards";
 import { ChannelButtons } from "@/components/channels";
 import { CopyButton } from "@/components/copy-button";
 import { Header } from "@/components/header";
-import { Arrow, Icon, TelegramLogo, WhatsAppLogo } from "@/components/icons";
-import { DIVISIONS, SITE, programmeBySlug } from "@/lib/site";
+import { Arrow, Icon } from "@/components/icons";
+import { fmtDate, fmtDay } from "@/lib/format";
+import { featuredPublication, openOpportunities, upcomingEvents } from "@/lib/queries";
+import { DIVISIONS, OPP_ICONS, programmeBySlug } from "@/lib/site";
+
+export const revalidate = 60;
 
 const FEATURES = [
   "Official WhatsApp and Telegram channels",
@@ -14,12 +18,10 @@ const FEATURES = [
   "Free to join, leave any time",
 ];
 
-const CHANNELS = [
-  { name: "WhatsApp Channel", line: "Opportunities, events and programme news", href: SITE.whatsapp, Logo: WhatsAppLogo },
-  { name: "Telegram Channel", line: "The same updates, plus a moderated help group", href: SITE.telegram, Logo: TelegramLogo },
-];
-
-export default function Home() {
+export default async function Home() {
+  const [events, opps, pub] = await Promise.all([upcomingEvents(3), openOpportunities({}, 2), featuredPublication()]);
+  const heroEvents = events.slice(0, 2);
+  const boardEvent = events.find((e) => e.slug === "national-tertiary-policy-dialogue-2027") ?? events[0];
   const progs = ["policy-forum", "campus-connect", "leadership-academy"].map((s) => programmeBySlug(s)!);
 
   return (
@@ -38,23 +40,36 @@ export default function Home() {
               </div>
 
               <div className="flex-[0_1_380px] w-full flex flex-col-reverse sm:flex-col gap-5">
-                <aside className="glass rounded-[20px] px-3 pt-2.5 pb-3.5 flex flex-col gap-2.5" aria-labelledby="official">
-                  <span aria-hidden="true" className="self-center w-[34px] h-1 rounded-full bg-white/40" />
-                  <h2 id="official" className="flex items-center gap-1.5 text-[13px] font-sans font-normal tracking-normal text-cream/80">
-                    <Icon name="shield" size={14} /> Official TFN channels
-                  </h2>
-                  {CHANNELS.map(({ name, line, href, Logo }) => (
-                    <a key={name} href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-[20px] bg-white/7 border border-white/12 hover:bg-white/12 transition-colors px-3.5 py-3">
-                      <span className="w-11 h-11 rounded-[14px] bg-white grid place-items-center flex-none"><Logo size={24} /></span>
-                      <span className="flex-1 min-w-0">
-                        <strong className="block font-semibold text-[15px]">{name}</strong>
-                        <span className="block text-[13px] text-cream/70">{line}</span>
-                      </span>
-                      <Arrow className="flex-none" />
-                    </a>
-                  ))}
-                  <p className="px-1 text-[13px] text-cream/70">Free to follow. We never ask for money.</p>
-                </aside>
+                {heroEvents.length > 0 && (
+                  <aside className="glass rounded-[20px] px-3 pt-2.5 pb-3.5 flex flex-col gap-2.5" aria-labelledby="coming-up">
+                    <span aria-hidden="true" className="self-center w-[34px] h-1 rounded-full bg-white/40" />
+                    <h2 id="coming-up" className="flex items-center gap-1.5 text-[13px] font-sans font-normal tracking-normal text-cream/80">
+                      <Icon name="calendar" size={14} /> Coming up across Nigeria
+                    </h2>
+                    {heroEvents.map((e) => (
+                      <Link key={e._id} href={`/events/${e.slug}`} className="block rounded-[20px] bg-white/7 border border-white/12 hover:bg-white/12 transition-colors px-3.5 py-3">
+                        <span className="flex justify-between gap-2.5 text-[13px]">
+                          <strong className="font-semibold">{e.title}</strong>
+                          <span className="text-cream/70">{e.free ? "Free" : ""}</span>
+                        </span>
+                        <span className="mt-1.5 flex items-end justify-between gap-2.5">
+                          <span className="flex flex-col">
+                            <span className="text-[12px] text-cream/60">Date</span>
+                            <span className="font-display text-[26px] font-medium tracking-[-0.03em] leading-[1.1]">{fmtDay(e.startsAt)}</span>
+                          </span>
+                          <span className="mb-1 rounded-full bg-white/14 px-2.5 py-0.5 text-[12px] font-semibold">{e.city}</span>
+                          {e.placesLeft !== null && (
+                            <span className="flex flex-col items-end">
+                              <span className="text-[12px] text-cream/60">Places left</span>
+                              <span className="font-display text-[26px] font-medium tracking-[-0.03em] leading-[1.1]">{e.placesLeft}</span>
+                            </span>
+                          )}
+                        </span>
+                      </Link>
+                    ))}
+                    <Link href="/news#events" className="self-start rounded-full bg-coral text-navy px-3 py-1 text-[13px] font-bold">Registration open</Link>
+                  </aside>
+                )}
                 <div className="flex flex-wrap items-center sm:justify-end gap-x-5 gap-y-2.5">
                   <Link href="/join" className="btn btn-coral">Join the Digital Communities <Arrow /></Link>
                   <Link href="/programmes" className="inline-flex items-center gap-1.5 min-h-11 font-semibold text-[15px] hover:text-coral">Our programmes <Arrow /></Link>
@@ -120,16 +135,68 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About */}
-      <section className="wrap pb-16 lg:pb-24" aria-labelledby="about-tfn">
-        <div className="card overflow-hidden grid md:grid-cols-2">
-          <div className="p-6 lg:p-10 flex flex-col justify-center order-2 md:order-1">
-            <h2 id="about-tfn" className="h-sec">A network for ideas, institutions and leadership</h2>
-            <p className="mt-3 text-muted lede">Beginning with tertiary institutions, TFN connects students, academics, institutional leaders, public officials and partners.</p>
-            <Link href="/about" className="mt-6 btn btn-line self-start">About TFN <Arrow /></Link>
+      {/* On the board */}
+      <section className="band grad" aria-labelledby="board">
+        <div className="wrap py-14 lg:py-20">
+          <SectionHead id="board" title="On the board" onDark action={{ href: "/news", label: "All news and events" }} />
+          <div className="grid lg:grid-cols-[1.25fr_1fr] gap-4">
+            {boardEvent && (
+              <Link href={`/events/${boardEvent.slug}`} className="group glass rounded-[20px] overflow-hidden flex flex-col">
+                <Photo src="/photos/auditorium-full.jpg" alt="A packed conference hall during a session" height={260} className="!bg-white/10" />
+                <div className="p-5 flex items-end justify-between gap-4">
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-coral"><Icon name="calendar" size={16} /> Event</span>
+                    <h3 className="mt-1.5 text-[26px] tracking-[-0.03em]">{boardEvent.title}</h3>
+                    <p className="mt-1 text-cream/75">{fmtDate(boardEvent.startsAt)}, {boardEvent.city}</p>
+                  </div>
+                  <span className="w-11 h-11 rounded-full bg-coral text-navy grid place-items-center flex-none"><Arrow /></span>
+                </div>
+              </Link>
+            )}
+            <div className="grid gap-4">
+              {opps.map((o) => (
+                <Link key={o._id} href={`/opportunities/${o.slug}`} className="group glass rounded-[20px] p-5 flex gap-4 items-start hover:bg-white/14 transition-colors">
+                  <span className="w-11 h-11 rounded-[14px] grid place-items-center bg-white/12 text-coral flex-none">
+                    <Icon name={OPP_ICONS[o.category] || "opportunities"} size={22} />
+                  </span>
+                  <div className="flex-1">
+                    <span className="text-[14px] text-cream/70">{o.category.replace(/s$/, "")}</span>
+                    <h3 className="text-[21px] tracking-[-0.03em] leading-tight mt-0.5">{o.title}</h3>
+                    <p className="mt-2 text-[14px] text-cream/75">Closes {fmtDate(o.closesAt)}</p>
+                  </div>
+                  <Arrow className="mt-1" />
+                </Link>
+              ))}
+              <Link href="/opportunities" className="btn btn-white self-start">Explore the Opportunity Hub <Arrow /></Link>
+            </div>
           </div>
-          <Photo src="/photos/team-planning.jpg" alt="Young people planning around a table" className="min-h-[260px] md:min-h-[340px] order-1 md:order-2" sizes="(min-width: 768px) 50vw, 100vw" />
         </div>
+      </section>
+
+      {/* Research + About */}
+      <section className="wrap py-16 lg:py-24 grid lg:grid-cols-2 gap-5" aria-label="Research and about TFN">
+        {pub && (
+          <article className="card overflow-hidden flex flex-col relative group">
+            <Photo src="/photos/women-laptop.jpg" alt="Young women gathered around a laptop" height={260} />
+            <div className="p-6 flex-1 flex flex-col">
+              <h2 className="text-[15px] font-semibold text-coral-ink tracking-normal font-sans">Research & insights</h2>
+              <span className="mt-3 inline-flex items-center gap-1.5 text-[14px] text-muted"><Icon name="doc" size={16} /> {pub.type}</span>
+              <h3 className="mt-1.5 text-[26px] tracking-[-0.03em]">
+                <Link href={`/research/${pub.slug}`} className="after:absolute after:inset-0">{pub.title}</Link>
+              </h3>
+              <p className="mt-2 text-muted text-[15px]">{fmtDate(pub.publishedAt)}</p>
+              <Link href="/research" className="relative z-10 mt-auto pt-5 link self-start">Browse all publications</Link>
+            </div>
+          </article>
+        )}
+        <article className="card overflow-hidden flex flex-col">
+          <Photo src="/photos/team-planning.jpg" alt="Young people planning around a table" height={300} />
+          <div className="p-6 flex-1 flex flex-col">
+            <h2 className="text-[30px]">A network for ideas, institutions and leadership</h2>
+            <p className="mt-3 text-muted">Beginning with tertiary institutions, TFN connects students, academics, institutional leaders, public officials and partners.</p>
+            <Link href="/about" className="mt-auto pt-5 btn btn-line self-start">About TFN <Arrow /></Link>
+          </div>
+        </article>
       </section>
 
       {/* Partner */}

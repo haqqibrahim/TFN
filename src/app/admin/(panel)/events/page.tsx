@@ -106,7 +106,7 @@ export default async function Events({ searchParams }: { searchParams: Promise<{
       <ul className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-5">
         <Stat k="Registered" v={all.length} n={ev.capacity ? `${Math.max(0, ev.capacity - all.length)} of ${ev.capacity} places left` : "No limit on places"} />
         <Stat k="In person" v={inPerson} n={`${all.length - inPerson} online`} />
-        <Stat k="Checked in" v={here} n={inPerson ? `${Math.round((here / inPerson) * 100)}% of in-person` : undefined} />
+        <Stat k="Checked in" v={here} n={inPerson ? `Of ${inPerson} coming in person` : "No one coming in person"} />
         <Stat k="Access needs" v={access} n={access ? "Check before the day" : "None shared"} />
       </ul>
 

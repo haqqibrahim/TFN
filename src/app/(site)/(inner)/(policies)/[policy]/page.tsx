@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { POLICIES } from "@/lib/policies";
 
-export const dynamicParams = false;
+// Unknown slugs fall through to notFound() below; `false` here makes Next log NoFallbackError for every stray URL.
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return POLICIES.map((p) => ({ policy: p.slug }));

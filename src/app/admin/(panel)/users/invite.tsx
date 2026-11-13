@@ -11,7 +11,7 @@ export function Invite({ roles }: { roles: readonly string[] }) {
     return (
       <div role="status" className="rounded-[14px] bg-ok-tint p-4">
         <p className="font-semibold text-ok">Account created for {s.email}</p>
-        <p className="mt-1 text-[15px]">Send them this temporary password privately. They’ll set up two-step sign-in the first time they sign in.</p>
+        <p className="mt-1 text-[15px]">Send them this temporary password privately. They’ll choose their own password when they first sign in.</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <code className="font-mono text-[17px] bg-white rounded-[12px] px-3 py-2 tracking-[0.06em]">{s.password}</code>
           <CopyButton text={s.password || ""} label="Copy password" />

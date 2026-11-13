@@ -6,14 +6,14 @@ import { AdminUser, type Role } from "./models";
 import { COOKIE, read, sign, type Session } from "./session";
 
 export async function setSession(s: Session) {
-  const ttl = s.stage === "full" ? "8h" : "10m";
+  const ttl = "8h";
   const jar = await cookies();
   jar.set(COOKIE, await sign(s, ttl), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: s.stage === "full" ? 8 * 3600 : 600,
+    maxAge: 8 * 3600,
   });
 }
 
@@ -26,15 +26,16 @@ export async function getSession() {
 }
 
 /** Use in every admin page and action. Re-checks the account is still active. */
-export async function requireAdmin(roles?: Role[]) {
+export async function requireAdmin(roles?: Role[], opts?: { allowMustChange?: boolean }) {
   const s = await getSession();
-  if (!s || s.stage !== "full") redirect("/admin/sign-in");
+  if (!s) redirect("/admin/sign-in");
   await db();
-  const u = await AdminUser.findById(s.sub).select("name email role active").lean();
+  const u = await AdminUser.findById(s.sub).select("name email role active mustChangePassword").lean();
   if (!u || !u.active) {
     try { await clearSession(); } catch { /* cookies are read-only while rendering; the sign-in page replaces it */ }
     redirect("/admin/sign-in");
   }
+  if (u.mustChangePassword && !opts?.allowMustChange) redirect("/admin/password");
   if (roles && u.role !== "Super admin" && !roles.includes(u.role as Role)) {
     redirect("/admin?denied=1");
   }

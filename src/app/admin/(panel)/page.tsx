@@ -10,7 +10,7 @@ export const metadata = { title: { absolute: "Dashboard | TFN Admin" } };
 
 const WEEK = 7 * 86400000;
 
-export default async function Dashboard({ searchParams }: { searchParams: Promise<{ denied?: string }> }) {
+export default async function Dashboard({ searchParams }: { searchParams: Promise<{ denied?: string; done?: string }> }) {
   const me = await requireAdmin();
   const sp = await searchParams;
   await db();
@@ -60,6 +60,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
   return (
     <>
+      {sp.done === "password" && <p role="status" className="mb-4 rounded-[14px] bg-ok-tint text-ok px-4 py-3 font-medium">Password saved. Use it next time you sign in.</p>}
       {sp.denied && (
         <p role="alert" className="mb-4 rounded-[14px] bg-coral-tint text-coral-ink px-4 py-3 font-medium">Your role doesn’t have access to that area. Ask a super administrator if you need it.</p>
       )}

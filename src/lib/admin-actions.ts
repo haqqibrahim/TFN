@@ -294,7 +294,7 @@ export async function inviteUser(_: InviteState, fd: FormData): Promise<InviteSt
   if (!(ROLES as readonly string[]).includes(role)) return { error: "Choose a role." };
   if (await AdminUser.exists({ email })) return { error: "Someone with that email already has an account." };
   const password = crypto.randomBytes(9).toString("base64url");
-  await AdminUser.create({ name, email, role, passwordHash: await bcrypt.hash(password, 12) });
+  await AdminUser.create({ name, email, role, passwordHash: await bcrypt.hash(password, 12), mustChangePassword: true });
   await log(me.name, `invited ${name} as ${role}`, "/admin/users");
   refresh("/admin/users");
   return { ok: true, email, password };
@@ -313,13 +313,8 @@ export async function updateUser(fd: FormData) {
   }
   if (intent === "deactivate") u.active = false;
   if (intent === "activate") u.active = true;
-  if (intent === "reset2fa") {
-    u.totpEnabled = false;
-    u.totpSecret = undefined;
-    u.backupCodes = [];
-  }
   await u.save();
-  await log(me.name, intent === "role" ? `changed ${u.name}’s role to ${u.role}` : intent === "reset2fa" ? `reset two-step sign-in for ${u.name}` : `${intent}d ${u.name}`, "/admin/users");
+  await log(me.name, intent === "role" ? `changed ${u.name}’s role to ${u.role}` : `${intent}d ${u.name}`, "/admin/users");
   refresh("/admin/users");
   redirect("/admin/users?done=" + intent);
 }
@@ -333,3 +328,19 @@ export async function saveContentAs(intent: string, fd: FormData) { fd.set("inte
 export async function reviewOpportunityAs(decision: string, fd: FormData) { fd.set("decision", decision); return reviewOpportunity(fd); }
 export async function saveChannelPostAs(intent: string, fd: FormData) { fd.set("intent", intent); return saveChannelPost(fd); }
 export async function updateUserAs(intent: string, fd: FormData) { fd.set("intent", intent); return updateUser(fd); }
+
+export type ResetState = { password?: string; error?: string };
+
+/** Gives someone a new temporary password. They must choose their own when they next sign in. */
+export async function resetPassword(_: ResetState, fd: FormData): Promise<ResetState> {
+  const me = await gate("users");
+  const u = await AdminUser.findById(str(fd, "id"));
+  if (!u) return { error: "That account no longer exists." };
+  if (String(u._id) === me.id) return { error: "Change your own password from the menu instead." };
+  const password = crypto.randomBytes(9).toString("base64url");
+  u.passwordHash = await bcrypt.hash(password, 12);
+  u.mustChangePassword = true;
+  await u.save();
+  await log(me.name, `reset the password for ${u.name}`, "/admin/users");
+  return { password };
+}

@@ -31,9 +31,10 @@ async function main() {
   /* ---------- Admin users ---------- */
   const email = process.env.SEED_ADMIN_EMAIL;
   const password = process.env.SEED_ADMIN_PASSWORD;
+  // The default super admin. Its password is temporary: the first sign-in asks for a new one.
   if (email && password && !(await AdminUser.exists({ email }))) {
-    await AdminUser.create({ name: "Amara Okeke", email, role: "Super admin", passwordHash: await bcrypt.hash(password, 12) });
-    console.log("Created test admin", email);
+    await AdminUser.create({ name: process.env.SEED_ADMIN_NAME || "Administrator", email, role: "Super admin", passwordHash: await bcrypt.hash(password, 12), mustChangePassword: true });
+    console.log("Created the default admin", email);
   }
   const staff = [
     { name: "Tunde Bakare", email: "tunde.bakare@tfnetwork.org", role: "Editor" },
@@ -43,7 +44,7 @@ async function main() {
   ];
   for (const s of staff) {
     if (!(await AdminUser.exists({ email: s.email }))) {
-      await AdminUser.create({ ...s, passwordHash: await bcrypt.hash(crypto.randomBytes(24).toString("hex"), 10), totpEnabled: true, lastSignIn: daysAgo(Math.ceil(Math.random() * 9)) });
+      await AdminUser.create({ ...s, passwordHash: await bcrypt.hash(crypto.randomBytes(24).toString("hex"), 10), lastSignIn: daysAgo(Math.ceil(Math.random() * 9)) });
     }
   }
 

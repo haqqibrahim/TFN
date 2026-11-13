@@ -5,7 +5,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   if (pathname.startsWith("/admin/sign-in")) return NextResponse.next();
   const s = await read(req.cookies.get(COOKIE)?.value);
-  if (!s || s.stage !== "full") {
+  if (!s) {
     const url = req.nextUrl.clone();
     url.pathname = "/admin/sign-in";
     url.search = "";

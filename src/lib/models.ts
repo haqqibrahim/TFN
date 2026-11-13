@@ -241,9 +241,7 @@ const AdminUserSchema = new Schema(
     email: { type: String, required: true, unique: true, lowercase: true },
     role: { type: String, enum: ROLES, default: "Viewer" },
     passwordHash: { type: String, required: true },
-    totpSecret: String,
-    totpEnabled: { type: Boolean, default: false },
-    backupCodes: [String], // bcrypt hashes
+    mustChangePassword: { type: Boolean, default: false },
     active: { type: Boolean, default: true },
     lastSignIn: Date,
   },

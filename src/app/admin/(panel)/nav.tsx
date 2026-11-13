@@ -56,6 +56,9 @@ export function AdminNav({ me, badges }: { me: { name: string; role: string }; b
             <span className="block text-[13px] text-muted">{me.role === "Super admin" ? "Super administrator" : me.role}</span>
           </span>
         </div>
+        <Link href="/admin/password" className="flex items-center gap-3 rounded-full px-4 min-h-11 text-[15px] hover:bg-admin">
+          <Icon name="key" size={19} /> Change password
+        </Link>
         <Link href="/" target="_blank" className="flex items-center gap-3 rounded-full px-4 min-h-11 text-[15px] hover:bg-admin">
           <Icon name="eye" size={19} /> View the website
         </Link>

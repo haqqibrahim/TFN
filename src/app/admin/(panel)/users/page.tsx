@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { updateUser, updateUserAs } from "@/lib/admin-actions";
 import { CAN, requireAdmin } from "@/lib/auth";
@@ -6,10 +7,11 @@ import { AdminUser, ROLES } from "@/lib/models";
 import { ConfirmButton } from "../confirm";
 import { Flash, PageHead, Panel, Table, Who, ago } from "../ui";
 import { Invite } from "./invite";
+import { ResetPassword } from "./reset";
 
 export const metadata = { title: { absolute: "Users and roles | TFN Admin" } };
 
-const DONE: Record<string, string> = { role: "Role changed.", deactivate: "Account switched off. They can no longer sign in.", activate: "Account switched back on.", reset2fa: "Two-step sign-in reset. They’ll set it up again next time." };
+const DONE: Record<string, string> = { role: "Role changed.", deactivate: "Account switched off. They can no longer sign in.", activate: "Account switched back on."};
 const AREAS: { k: keyof typeof CAN; label: string }[] = [
   { k: "edit", label: "Write and edit content" },
   { k: "publish", label: "Approve and publish" },
@@ -25,7 +27,7 @@ export default async function Users({ searchParams }: { searchParams: Promise<{ 
   const me = await requireAdmin(["Super admin"]);
   const sp = await searchParams;
   await db();
-  const users = await AdminUser.find().select("name email role active totpEnabled lastSignIn").sort({ active: -1, name: 1 }).lean();
+  const users = await AdminUser.find().select("name email role active mustChangePassword lastSignIn").sort({ active: -1, name: 1 }).lean();
 
   return (
     <>
@@ -34,7 +36,7 @@ export default async function Users({ searchParams }: { searchParams: Promise<{ 
 
       <Panel title="Add someone" className="mb-5"><Invite roles={ROLES} /></Panel>
 
-      <Table head={["Name", "Role", "Two-step sign-in", "Last signed in", ""]}>
+      <Table head={["Name", "Role", "Password", "Last signed in", ""]}>
         {users.map((u) => {
           const id = String(u._id);
           const self = id === me.id;
@@ -51,19 +53,21 @@ export default async function Users({ searchParams }: { searchParams: Promise<{ 
                   {!self && <button className="btn btn-sm btn-line !min-h-10">Change</button>}
                 </form>
               </td>
-              <td className="whitespace-nowrap">{u.totpEnabled ? <span className="inline-flex items-center gap-1.5 text-ok font-medium"><Icon name="check" size={16} /> On</span> : <span className="text-[#8A5A00] font-medium">Not set up yet</span>}</td>
+              <td className="whitespace-nowrap">{u.mustChangePassword ? <span className="text-[#8A5A00] font-medium">Temporary</span> : <span className="inline-flex items-center gap-1.5 text-ok font-medium"><Icon name="check" size={16} /> Set</span>}</td>
               <td className="text-muted whitespace-nowrap">{u.lastSignIn ? ago(u.lastSignIn) : "Never"}</td>
               <td>
                 {!self && (
-                  <form action={updateUser} className="flex gap-2 justify-end">
+                  <div className="flex gap-2 justify-end items-center">
+                  <ResetPassword id={id} name={u.name} />
+                    <form action={updateUser} className="flex gap-2 justify-end">
                     <input type="hidden" name="id" value={id} />
-                    {u.totpEnabled && <ConfirmButton message={`Reset two-step sign-in for ${u.name}? Use this if they’ve lost their phone.`} formAction={updateUserAs.bind(null, "reset2fa")} className="btn btn-sm btn-line whitespace-nowrap">Reset two-step</ConfirmButton>}
                     {u.active
                       ? <ConfirmButton message={`Switch off ${u.name}’s account? They won’t be able to sign in.`} formAction={updateUserAs.bind(null, "deactivate")} className="btn btn-sm btn-line whitespace-nowrap">Switch off</ConfirmButton>
                       : <button formAction={updateUserAs.bind(null, "activate")} className="btn btn-sm btn-navy whitespace-nowrap">Switch on</button>}
                   </form>
+                  </div>
                 )}
-                {self && <span className="text-[13px] text-muted">You</span>}
+                {self && <Link href="/admin/password" className="btn btn-sm btn-line whitespace-nowrap">Change your password</Link>}
               </td>
             </tr>
           );

@@ -12,11 +12,12 @@ The project is delivered in three phases. Each phase has its own Git branch, and
 
 - Visual identity: navy, cream and coral glass style, TFN logo, Inter type, chosen photography
 - Responsive layout for phones, tablets and desktops, with accessible navigation and a mobile menu
-- Home page: hero, official WhatsApp and Telegram channels, programmes, divisions, about, partner and membership calls to action
+- Home page: hero, official WhatsApp and Telegram channels (through the sign-up), programmes, divisions, about, partner and membership calls to action
 - About TFN, including mission and the six divisions
 - Programmes overview and a page for each of the ten flagship programmes, with GOTV kept separate from the Digital Communities
 - Membership page
-- Tertiary Digital Communities sign-up, saved to the database, with a confirmation page and a self-service "delete my registration" link
+- Tertiary Digital Communities sign-up: name, email, WhatsApp number, state, institution (searchable list of 590+ Nigerian universities, polytechnics and colleges of education, with short names like UNILAG) and a yes/no PVC question, saved to the database
+- Gated community links: every WhatsApp and Telegram button leads to the sign-up first, and the real channel links are shown only after registering; returning members see them straight away, with a self-service "delete my registration" option
 - Partners page with a partnership enquiry form and document upload
 - Contact page with an enquiry form, including reporting fake TFN channels
 - Privacy, cookies, terms, accessibility, opportunity information and Digital Communities notices

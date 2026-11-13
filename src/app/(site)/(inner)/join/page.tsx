@@ -4,12 +4,13 @@ import { Photo } from "@/components/cards";
 import { ChannelButtons } from "@/components/channels";
 import { Faqs } from "@/components/faqs";
 import { Arrow, Icon, type IconName } from "@/components/icons";
+import { COMMUNITY_LINKS, currentMember } from "@/lib/member";
 import { SITE } from "@/lib/site";
 import { JoinForm } from "./join-form";
 
 export const metadata: Metadata = {
   title: { absolute: "Join the Tertiary Digital Communities | TFN" },
-  description: "Follow TFN’s official WhatsApp and Telegram channels for updates, opportunities and events. Free, and easy to leave.",
+  description: "Register for TFN’s Tertiary Digital Communities to get the official WhatsApp and Telegram links. Free, and easy to leave.",
 };
 
 const NEVER: { label: string; icon: IconName }[] = [
@@ -21,10 +22,12 @@ const NEVER: { label: string; icon: IconName }[] = [
 
 const FAQS = [
   { q: "Does it cost anything?", a: "No. Joining is free." },
+  { q: "Why do I have to register first?", a: "So the channels stay for real students and staff, and so we can share updates that fit your campus and state. The links appear as soon as you register." },
+  { q: "Why do you ask about a PVC?", a: "To understand how many members can vote. It’s a yes or no question only. Never send a photo of your PVC to anyone, including people claiming to be TFN." },
   { q: "Is this TFN membership?", a: "No. Membership will have its own application, and we’ll announce it on the channels." },
   { q: "Will I be added to a group chat?", a: "No. Channels are one-way updates. Discussion spaces are separate and optional." },
   { q: "How do I leave?", a: "Unfollow the channel any time. To delete a registration, use the link on your confirmation page or contact us." },
-  { q: "How do I know a channel is real?", a: "Only the links on this page are official." },
+  { q: "How do I know a channel is real?", a: "Official links are only shown on this website after you register. Links shared anywhere else may be fake." },
 ];
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
@@ -41,37 +44,64 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
   );
 }
 
-export default function JoinPage() {
+export const dynamic = "force-dynamic";
+
+type Channel = "WhatsApp" | "Telegram" | "Both";
+
+export default async function JoinPage({ searchParams }: { searchParams: Promise<{ channel?: string }> }) {
+  const { channel } = await searchParams;
+  const pick: Channel = channel === "WhatsApp" || channel === "Telegram" ? channel : "Both";
+  const member = await currentMember();
   return (
     <>
       <section className="wrap pt-6 lg:pt-10 pb-8 grid lg:grid-cols-[1.1fr_1fr] gap-6 lg:gap-10 items-center">
         <div>
           <h1 className="h-page max-w-[14ch]">Join the Tertiary Digital Communities</h1>
-          <p className="mt-4 lede text-muted max-w-[36ch]">Official TFN updates, opportunities and conversations, straight to your phone.</p>
+          <p className="mt-4 lede text-muted max-w-[36ch]">Register once, then follow TFN’s official WhatsApp and Telegram channels for updates and opportunities.</p>
         </div>
         <Photo src="/photos/student-volunteers.jpg" alt="Student volunteers sitting together" priority className="h-[240px] lg:h-[340px] rounded-[20px]" sizes="(min-width:1024px) 50vw, 100vw" />
       </section>
 
       <div className="wrap pb-16 lg:pb-24 grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-5 items-start [&>*]:min-w-0">
         <div className="grid gap-5 [&>*]:min-w-0">
-          <Step n={1} title="Follow an official channel">
-            <div className="mt-5 grid sm:grid-cols-2 gap-3">
-              <ChannelButtons variant="line" full />
-            </div>
-            <p className="mt-4 text-[15px] text-muted">Free. Unfollow any time. No group chats.</p>
-          </Step>
+          {member ? (
+            <Step n={1} title={`You’re registered, ${member.firstName}`}>
+              <p className="mt-2 text-muted">These are TFN’s official channels. Follow one or both.</p>
+              <div className="mt-5 grid sm:grid-cols-2 gap-3">
+                <ChannelButtons variant="line" full links={COMMUNITY_LINKS} />
+              </div>
+              <p className="mt-4 text-[15px] text-muted">
+                Free. Unfollow any time. <Link href="/join/done" className="link">Manage your registration</Link>
+              </p>
+            </Step>
+          ) : (
+            <>
+              <Step n={1} title="Register">
+                <p className="mt-2 text-muted">It takes a minute. The channel links appear as soon as you’re done.</p>
+                <div className="mt-6 scroll-mt-6" id="register">
+                  <JoinForm channel={pick} />
+                </div>
+              </Step>
 
-          <Step n={2} title="Register (optional)">
-            <p className="mt-2 text-muted">Tell us your institution and we’ll share campus updates that fit.</p>
-            <div className="mt-6">
-              <JoinForm />
-            </div>
-          </Step>
+              <Step n={2} title="Follow an official channel">
+                <div className="mt-5 grid sm:grid-cols-2 gap-3" aria-hidden="true">
+                  {["WhatsApp Channel", "Telegram Channel"].map((l) => (
+                    <span key={l} className="btn btn-line w-full !justify-start opacity-55 cursor-not-allowed">
+                      <Icon name="lock" size={20} /> {l}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-4 text-[15px] text-muted">Register above to unlock the links. Free. Unfollow any time.</p>
+              </Step>
+            </>
+          )}
 
-          <Step n={3} title="Ask and take part">
+          <Step n={member ? 2 : 3} title="Ask and take part">
             <p className="mt-2 text-muted">Questions and discussion happen in small moderated spaces, never the channel.</p>
             <div className="mt-5 flex flex-wrap gap-3">
-              <a href="https://t.me/tfnetwork_help" target="_blank" rel="noopener noreferrer" className="btn btn-line">Join a community space <Arrow /></a>
+              {member && (
+                <a href={COMMUNITY_LINKS.help} target="_blank" rel="noopener noreferrer" className="btn btn-line">Join a community space <Arrow /></a>
+              )}
               <Link href="/contact?topic=Digital%20Communities" className="btn btn-line">Contact support</Link>
             </div>
           </Step>
@@ -83,7 +113,7 @@ export default function JoinPage() {
               <span className="w-11 h-11 rounded-[14px] bg-white/12 grid place-items-center text-coral"><Icon name="shield" size={22} /></span>
               <h2 id="safe" className="text-[26px]">Stay safe</h2>
             </div>
-            <p className="mt-3 text-cream/80">Official links appear only on this page. TFN will never ask for:</p>
+            <p className="mt-3 text-cream/80">Official links are only shown here after you register. TFN will never ask for:</p>
             <ul className="mt-4 grid grid-cols-2 gap-2.5">
               {NEVER.map((n) => (
                 <li key={n.label} className="rounded-[14px] bg-white/8 border border-white/14 p-3 flex flex-col gap-2">

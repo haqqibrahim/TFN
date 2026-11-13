@@ -14,12 +14,12 @@ export function JoinStrip() {
       <div className="wrap flex items-center justify-between gap-4 py-2">
         <div className="flex items-center gap-2.5">
           <span className="hidden sm:inline text-cream/70">Official channels</span>
-          <a href={SITE.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="TFN WhatsApp Channel">
+          <Link href={SITE.whatsapp} aria-label="Join the TFN WhatsApp Channel">
             <WhatsAppLogo size={22} />
-          </a>
-          <a href={SITE.telegram} target="_blank" rel="noopener noreferrer" aria-label="TFN Telegram Channel">
+          </Link>
+          <Link href={SITE.telegram} aria-label="Join the TFN Telegram Channel">
             <TelegramLogo size={22} />
-          </a>
+          </Link>
         </div>
         <Link href="/join" className="inline-flex items-center gap-1.5 font-semibold hover:text-coral">
           Join the Digital Communities <Arrow size={12} />

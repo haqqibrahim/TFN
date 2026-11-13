@@ -506,6 +506,7 @@ The condition for all four: publish what comes in and where it goes.`,
       institution: insts[i % insts.length],
       state: states[i % states.length],
       role: ["Student", "Student", "Student", "Graduate", "Academic staff", "Campus organisation"][i % 6],
+      pvc: i % 5 < 3 ? "Yes" : "No",
       channels: i % 3 === 0 ? ["Telegram"] : i % 3 === 1 ? ["WhatsApp"] : ["WhatsApp", "Telegram"],
       emailUpdates: i % 2 === 0,
       deleteToken: crypto.randomBytes(16).toString("hex"),
@@ -526,9 +527,9 @@ The condition for all four: publish what comes in and where it goes.`,
 
   /* ---------- Channels ---------- */
   await Channel.insertMany([
-    { name: "TFN WhatsApp Channel", platform: "WhatsApp", handle: "Tertiary Futures Network", url: process.env.NEXT_PUBLIC_WHATSAPP_URL || "https://whatsapp.com/channel/tfnetwork", members: 4820, owner: "Chidi Nnamdi" },
-    { name: "TFN Telegram Channel", platform: "Telegram", handle: "@tfnetwork", url: process.env.NEXT_PUBLIC_TELEGRAM_URL || "https://t.me/tfnetwork", members: 2160, owner: "Chidi Nnamdi" },
-    { name: "Questions and support (moderated)", platform: "Telegram", handle: "@tfnetwork_help", url: "https://t.me/tfnetwork_help", members: 310, owner: "Zainab Yusuf" },
+    { name: "TFN WhatsApp Channel", platform: "WhatsApp", handle: "Tertiary Futures Network", url: process.env.WHATSAPP_CHANNEL_URL || "https://whatsapp.com/channel/tfnetwork", members: 4820, owner: "Chidi Nnamdi" },
+    { name: "TFN Telegram Channel", platform: "Telegram", handle: "@tfnetwork", url: process.env.TELEGRAM_CHANNEL_URL || "https://t.me/tfnetwork", members: 2160, owner: "Chidi Nnamdi" },
+    { name: "Questions and support (moderated)", platform: "Telegram", handle: "@tfnetwork_help", url: process.env.TELEGRAM_HELP_URL || "https://t.me/tfnetwork_help", members: 310, owner: "Zainab Yusuf" },
     { name: "TFN on X", platform: "X", handle: "@tfnetwork", url: "https://x.com/tfnetwork", members: 1290, owner: "Chidi Nnamdi" },
   ]);
   await ChannelPost.insertMany([

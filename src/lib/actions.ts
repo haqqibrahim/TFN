@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "./db";
 import { Activity, Enquiry, JoinRegistration, Upload } from "./models";
+import { clearMemberCookie, setMemberCookie } from "./member";
+import { NIGERIAN_STATES } from "./site";
 
 export type FormState = {
   ok?: boolean;
@@ -67,14 +69,15 @@ const JoinSchema = z.object({
   firstName: req("Enter your first name").max(60),
   email,
   whatsapp: z
-    .string()
+    .string({ message: "Enter your WhatsApp number" })
     .trim()
-    .optional()
-    .transform((v) => (v ? v.replace(/[\s-]/g, "") : ""))
-    .refine((v) => !v || /^(\+?234|0)?[789][01]\d{8}$/.test(v), "Enter a Nigerian mobile number, like 0803 555 0142"),
-  institution: z.string().trim().max(120).optional(),
-  state: z.string().trim().optional(),
+    .min(1, "Enter your WhatsApp number")
+    .transform((v) => v.replace(/[\s()-]/g, ""))
+    .refine((v) => /^(\+?234|0)?[789][01]\d{8}$/.test(v), "Enter a Nigerian mobile number, like 0803 555 0142"),
+  institution: req("Choose your institution, or type its name").max(160),
+  state: z.enum(NIGERIAN_STATES as [string, ...string[]], { message: "Choose your state" }),
   role: req("Choose the option that fits you best"),
+  pvc: z.enum(["Yes", "No"], { message: "Tell us whether you have a PVC" }),
   channel: z.enum(["WhatsApp", "Telegram", "Both"], { message: "Choose a channel" }),
   emailUpdates: z.string().optional(),
   privacy: z.literal("on", { message: "Confirm you have read the privacy notice" }),
@@ -82,26 +85,30 @@ const JoinSchema = z.object({
 
 export async function joinAction(_: FormState, fd: FormData): Promise<FormState> {
   const v = values(fd);
-  if (isBot(fd)) redirect("/join/done");
+  if (isBot(fd)) redirect("/join");
   const parsed = JoinSchema.safeParse(v);
   if (!parsed.success) return fail(parsed.error, v);
   const d = parsed.data;
   await db();
-  let wa = d.whatsapp;
-  if (wa) wa = wa.startsWith("+") ? wa : wa.startsWith("234") ? "+" + wa : "+234" + wa.replace(/^0/, "");
-  const deleteToken = crypto.randomBytes(16).toString("hex");
-  await JoinRegistration.create({
+  const wa = d.whatsapp.startsWith("+") ? d.whatsapp : d.whatsapp.startsWith("234") ? "+" + d.whatsapp : "+234" + d.whatsapp.replace(/^0/, "");
+  const fields = {
     firstName: d.firstName,
-    email: d.email,
     whatsapp: wa,
     institution: d.institution,
     state: d.state,
     role: d.role,
+    pvc: d.pvc,
     channels: d.channel === "Both" ? ["WhatsApp", "Telegram"] : [d.channel],
     emailUpdates: d.emailUpdates === "on",
-    deleteToken,
-  });
-  redirect(`/join/done?n=${encodeURIComponent(d.firstName)}&t=${deleteToken}`);
+  };
+  // One registration per email: signing up again updates the details instead of making a copy.
+  const reg = await JoinRegistration.findOneAndUpdate(
+    { email: d.email },
+    { $set: fields, $setOnInsert: { email: d.email, deleteToken: crypto.randomBytes(16).toString("hex") } },
+    { upsert: true, new: true },
+  );
+  await setMemberCookie(String(reg._id));
+  redirect("/join/done");
 }
 
 export async function deleteJoinAction(fd: FormData) {
@@ -109,6 +116,7 @@ export async function deleteJoinAction(fd: FormData) {
   if (!/^[a-f0-9]{32}$/.test(t)) redirect("/join");
   await db();
   await JoinRegistration.deleteOne({ deleteToken: t });
+  await clearMemberCookie();
   redirect("/join/deleted");
 }
 

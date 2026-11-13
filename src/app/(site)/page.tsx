@@ -44,16 +44,16 @@ export default function Home() {
                     <Icon name="shield" size={14} /> Official TFN channels
                   </h2>
                   {CHANNELS.map(({ name, line, href, Logo }) => (
-                    <a key={name} href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-[20px] bg-white/7 border border-white/12 hover:bg-white/12 transition-colors px-3.5 py-3">
+                    <Link key={name} href={href} className="flex items-center gap-3 rounded-[20px] bg-white/7 border border-white/12 hover:bg-white/12 transition-colors px-3.5 py-3">
                       <span className="w-11 h-11 rounded-[14px] bg-white grid place-items-center flex-none"><Logo size={24} /></span>
                       <span className="flex-1 min-w-0">
                         <strong className="block font-semibold text-[15px]">{name}</strong>
                         <span className="block text-[13px] text-cream/70">{line}</span>
                       </span>
                       <Arrow className="flex-none" />
-                    </a>
+                    </Link>
                   ))}
-                  <p className="px-1 text-[13px] text-cream/70">Free to follow. We never ask for money.</p>
+                  <p className="px-1 text-[13px] text-cream/70">Free. Register once to get the links. We never ask for money.</p>
                 </aside>
                 <div className="flex flex-wrap items-center sm:justify-end gap-x-5 gap-y-2.5">
                   <Link href="/join" className="btn btn-coral">Join the Digital Communities <Arrow /></Link>

@@ -4,8 +4,9 @@ export const SITE = {
   name: "Tertiary Futures Network",
   short: "TFN",
   joinPath: "/join",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_URL || "https://whatsapp.com/channel/tfnetwork",
-  telegram: process.env.NEXT_PUBLIC_TELEGRAM_URL || "https://t.me/tfnetwork",
+  /** The community links are gated: these send people to the sign-up form first. */
+  whatsapp: "/join?channel=WhatsApp#register",
+  telegram: "/join?channel=Telegram#register",
   x: "https://x.com/tfnetwork",
   linkedin: "https://www.linkedin.com/company/tfnetwork",
   instagram: "https://www.instagram.com/tfnetwork",

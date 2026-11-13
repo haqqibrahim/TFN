@@ -156,6 +156,7 @@ const JoinRegistrationSchema = new Schema(
     institution: String,
     state: String,
     role: String,
+    pvc: { type: String, enum: ["Yes", "No"] },
     channels: [String],
     emailUpdates: { type: Boolean, default: false },
     deleteToken: { type: String, index: true },

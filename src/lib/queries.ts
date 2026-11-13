@@ -51,8 +51,8 @@ export async function openOpportunities(filter: { category?: string; location?: 
     if (filter.location === "Nigeria") q.location = { $nin: ["Abroad", "Online"] };
     else q.location = filter.location;
   }
+  if (filter.closing === "week") q.closesAt.$lte = new Date(Date.now() + 7 * 86400000);
   if (filter.closing === "month") q.closesAt.$lte = new Date(Date.now() + 31 * 86400000);
-  if (filter.closing === "quarter") q.closesAt.$lte = new Date(Date.now() + 92 * 86400000);
   if (filter.q) q.$or = [{ title: new RegExp(escapeRe(filter.q), "i") }, { provider: new RegExp(escapeRe(filter.q), "i") }];
   const sort: any = filter.sort === "newest" ? { publishedAt: -1 } : { closesAt: 1 };
   return plain(await Opportunity.find(q).sort(sort).limit(limit).lean()) as unknown as OppItem[];

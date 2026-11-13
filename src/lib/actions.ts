@@ -199,10 +199,8 @@ const OppSchema = z
     opensAt: z.string().optional(),
     closesAt: req("Enter the closing date"),
     applyUrl: z.string().trim().url("Enter the full link, starting with https://"),
-    submitterName: req("Enter your name").max(100),
     submitterEmail: email,
-    free: z.literal("on", { message: "Confirm applicants are never asked to pay" }),
-    consent: z.literal("on", { message: "Confirm the details are accurate" }),
+    consent: z.literal("on", { message: "Tick this box so we can review your submission" }),
   })
   .refine((d) => new Date(d.closesAt) > new Date(), { path: ["closesAt"], message: "The closing date must be in the future" });
 
@@ -229,12 +227,12 @@ export async function submitOpportunityAction(_: FormState, fd: FormData): Promi
     opensAt: d.opensAt ? new Date(d.opensAt) : undefined,
     closesAt: new Date(d.closesAt + "T22:59:00Z"),
     applyUrl: d.applyUrl,
-    submitterName: d.submitterName,
+    submitterName: d.provider,
     submitterEmail: d.submitterEmail,
     attachment: up.id,
     status: "pending",
   });
-  await Activity.create({ who: d.submitterName, what: `submitted “${d.title}” for review`, href: "/admin/opportunities" });
+  await Activity.create({ who: d.provider, what: `submitted “${d.title}” for review`, href: "/admin/opportunities" });
   revalidatePath("/admin");
   return { ok: true };
 }

@@ -289,7 +289,7 @@ export const NIGERIAN_STATES = [
   "Taraba", "Yobe", "Zamfara",
 ];
 
-export const JOIN_ROLES = ["Student", "Graduate", "Academic staff", "Non-academic staff", "Campus organisation", "Other"];
+export const JOIN_ROLES = ["Student", "Graduate", "Academic or staff", "Other"];
 
 export const CONTACT_TOPICS = [
   "General enquiry", "Programmes", "Partnerships", "Research", "Opportunities", "Media", "Digital Communities", "Report a fake channel",

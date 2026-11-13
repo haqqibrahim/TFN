@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SITE } from "@/lib/site";
 import { Arrow, TelegramLogo, WhatsAppLogo } from "./icons";
 
 /** Thin site-wide strip above inner-page headers. */
 export function JoinStrip() {
+  const path = usePathname();
+  if (path.startsWith("/join")) return null;
   return (
     <div className="bg-navy text-cream text-[14px]">
       <div className="wrap flex items-center justify-between gap-4 py-2">

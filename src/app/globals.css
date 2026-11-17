@@ -250,3 +250,17 @@ p { text-wrap: pretty; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* Admin: live indicators on the Students screens */
+@keyframes tfn-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(31, 157, 99, .55); }
+  70% { box-shadow: 0 0 0 9px rgba(31, 157, 99, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(31, 157, 99, 0); }
+}
+@keyframes tfn-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[tfn-"] { animation: none !important; }
+}

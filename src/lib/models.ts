@@ -260,6 +260,39 @@ const ActivitySchema = new Schema(
 );
 export const Activity = model("Activity", ActivitySchema);
 
+/* ---------- Registered students (FCT presentation data) ---------- */
+
+/** One masked record. Names, VINs and phone numbers are masked before import; nothing raw is stored. */
+const StudentRecordSchema = new Schema(
+  {
+    rid: { type: String, required: true, unique: true },
+    name: String,
+    gender: { type: String, enum: ["M", "F"] },
+    council: { type: String, index: true },
+    ward: { type: String, index: true },
+    vin: String,
+    phone: String,
+    network: String,
+    birthYear: Number,
+  },
+  opts,
+);
+export const StudentRecord = model("StudentRecord", StudentRecordSchema);
+
+/**
+ * Totals for every registered student, as one document per dataset.
+ * cube rows are [ward, gender, ageBand, network, count]; each ward belongs to one council (see fct-map).
+ */
+const StudentStatSchema = new Schema(
+  {
+    key: { type: String, required: true, unique: true },
+    total: Number,
+    cube: Schema.Types.Mixed,
+  },
+  opts,
+);
+export const StudentStat = model("StudentStat", StudentStatSchema);
+
 export type Plain<T> = T & { _id: string; createdAt: string; updatedAt: string };
 
 /* ---------- Uploaded files (attachments from public forms) ---------- */

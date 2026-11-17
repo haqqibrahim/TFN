@@ -1,0 +1,87 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Icon, type IconName } from "@/components/icons";
+import { LogoMark } from "@/components/logo";
+import { signOut } from "@/lib/auth-actions";
+import { initials } from "@/lib/format";
+
+const STUDENTS: { href: string; label: string; icon: IconName }[] = [
+  { href: "/admin/students", label: "Insights", icon: "grid" },
+  { href: "/admin/students/records", label: "Records", icon: "users" },
+];
+
+/** Sections that exist in the full admin but are switched off on this release. */
+const OFF = ["Dashboard", "Content", "Opportunities", "Registrations", "Channels", "Inbox", "Events", "Users & roles"];
+
+export function AdminNav({ me }: { me: { name: string; role: string } }) {
+  const path = usePathname();
+  const [open, setOpen] = useState(false);
+  useEffect(() => setOpen(false), [path]);
+
+  const body = (
+    <>
+      <nav aria-label="Admin" className="flex-1">
+        <p className="px-4 pb-1 text-[13px] font-semibold text-muted">Students</p>
+        <ul className="grid gap-1">
+          {STUDENTS.map((it) => {
+            const on = path === it.href;
+            return (
+              <li key={it.href}>
+                <Link href={it.href} aria-current={on ? "page" : undefined} className={`flex items-center gap-3 rounded-full px-4 min-h-11 text-[15px] font-medium transition-colors ${on ? "bg-navy text-cream" : "hover:bg-admin"}`}>
+                  <Icon name={it.icon} size={19} /> {it.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="px-4 pt-5 pb-1 text-[13px] font-semibold text-muted">Switched off for now</p>
+        <ul className="grid">
+          {OFF.map((l) => (
+            <li key={l} className="flex items-center gap-3 px-4 min-h-10 text-[15px] text-[#6B7385]">
+              <Icon name="lock" size={16} /> {l}<span className="sr-only"> (switched off)</span>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div className="mt-6 pt-5 border-t border-adminline grid gap-1">
+        <div className="flex items-center gap-3 px-2 pb-3">
+          <span className="w-10 h-10 rounded-full bg-coral-tint text-coral-ink grid place-items-center font-semibold text-[14px] flex-none" aria-hidden="true">{initials(me.name)}</span>
+          <span className="min-w-0">
+            <span className="block font-semibold text-[15px] truncate">{me.name}</span>
+            <span className="block text-[13px] text-muted">{me.role === "Super admin" ? "Super administrator" : me.role}</span>
+          </span>
+        </div>
+        <Link href="/admin/present" className="btn btn-coral mb-2"><Icon name="eye" size={18} /> Present</Link>
+        <Link href="/admin/password" className="flex items-center gap-3 rounded-full px-4 min-h-11 text-[15px] hover:bg-admin">
+          <Icon name="key" size={19} /> Change password
+        </Link>
+        <form action={signOut}>
+          <button type="submit" className="w-full flex items-center gap-3 rounded-full px-4 min-h-11 text-[15px] hover:bg-admin">
+            <Icon name="logout" size={19} /> Sign out
+          </button>
+        </form>
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      <div className="lg:hidden sticky top-0 z-30 bg-white border-b border-adminline px-4 h-16 flex items-center justify-between">
+        <Link href="/admin/students" className="flex items-center gap-2.5 font-display font-semibold tracking-[-0.02em]"><LogoMark size={34} /> TFN Admin</Link>
+        <button type="button" aria-expanded={open} aria-controls="admin-menu" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((o) => !o)} className="w-11 h-11 rounded-full border border-adminline grid place-items-center">
+          <Icon name={open ? "x" : "menu"} size={20} />
+        </button>
+      </div>
+      {open && (
+        <div id="admin-menu" className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-30 bg-white p-4 flex flex-col overflow-y-auto">{body}</div>
+      )}
+      <aside className="hidden lg:flex flex-col sticky top-0 h-dvh bg-white border-r border-adminline p-4 overflow-y-auto">
+        <Link href="/admin/students" className="flex items-center gap-2.5 px-2 pt-1 pb-6 font-display text-[18px] font-semibold tracking-[-0.02em]"><LogoMark size={36} /> TFN Admin</Link>
+        {body}
+      </aside>
+    </>
+  );
+}

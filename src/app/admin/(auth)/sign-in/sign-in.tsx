@@ -13,8 +13,8 @@ export function SignIn() {
       <form action={action} className="grid gap-5">
         <Err msg={s.error} />
         <div>
-          <label htmlFor="email" className="block font-semibold text-[15px] mb-2">Email</label>
-          <input id="email" name="email" type="email" autoComplete="username" required defaultValue={s.email} className={darkField} placeholder="name@tfnetwork.org" />
+          <label htmlFor="email" className="block font-semibold text-[15px] mb-2">Email or username</label>
+          <input id="email" name="email" type="text" autoComplete="username" autoCapitalize="none" spellCheck={false} required defaultValue={s.email} className={darkField} />
         </div>
         <div>
           <label htmlFor="password" className="block font-semibold text-[15px] mb-2">Password</label>

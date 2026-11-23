@@ -28,6 +28,7 @@ export default async function Opportunities({ searchParams }: { searchParams: Pr
   const n = Object.fromEntries(counts.map((c) => [c._id, c.n]));
   const file = selected?.attachment ? await Upload.findById(selected.attachment).select("name size").lean() : null;
   const canPublish = allowed(me.role, "publish");
+  const canSeePeople = allowed(me.role, "inbox");
   const detailOpen = Boolean(selected || sp.new);
 
   return (
@@ -77,7 +78,7 @@ export default async function Opportunities({ searchParams }: { searchParams: Pr
             </form>
           </Panel>
         ) : selected ? (
-          <Detail o={selected} file={file} canPublish={canPublish} tab={tab} />
+          <Detail o={canSeePeople ? selected : { ...selected, submitterName: "", submitterEmail: "" }} file={canSeePeople ? file : null} canPublish={canPublish} tab={tab} />
         ) : (
           <div className="hidden lg:grid place-items-center rounded-[20px] border-2 border-dashed border-adminline min-h-[320px] text-muted p-8 text-center">
             Choose an opportunity to review it.

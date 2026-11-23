@@ -1,9 +1,9 @@
-import { requireAdmin } from "@/lib/auth";
+import { CAN, requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Upload } from "@/lib/models";
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  await requireAdmin();
+  await requireAdmin(CAN.inbox);
   await db();
   const { id } = await params;
   if (!/^[a-f0-9]{24}$/.test(id)) return new Response("Not found", { status: 404 });

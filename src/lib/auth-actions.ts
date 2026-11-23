@@ -25,14 +25,14 @@ const DUMMY = "$2a$12$CwTycUXWue0Thq9StjUM0uJ8Wf4xUjQf7Ckh0JQyHkG/7xY0vYcB2";
 export async function signIn(_: SignInState, fd: FormData): Promise<SignInState> {
   const email = String(fd.get("email") || "").trim().toLowerCase();
   const password = String(fd.get("password") || "");
-  if (!email || !password) return { email, error: "Enter your email and password." };
+  if (!email || !password) return { email, error: "Enter your email or username and your password." };
   if (throttled(email)) return { email, error: "Too many attempts. Wait 15 minutes and try again." };
   await db();
   const u = await AdminUser.findOne({ email });
   const ok = await bcrypt.compare(password, u?.passwordHash || DUMMY);
   if (!u || !ok || !u.active) {
     fail(email);
-    return { email, error: "That email and password don’t match an active admin account." };
+    return { email, error: "Those sign-in details don’t match an active admin account." };
   }
   fails.delete(email);
   u.lastSignIn = new Date();

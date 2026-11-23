@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/icons";
 import { enquiryToIncident, updateEnquiry } from "@/lib/admin-actions";
-import { requireAdmin } from "@/lib/auth";
+import { CAN, requireAdmin } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { AdminUser, Enquiry, Upload } from "@/lib/models";
 import { Back, Flash, PageHead, Panel, Status, Tabs, Who, ago, shortDate } from "../ui";
@@ -11,7 +11,7 @@ export const metadata = { title: { absolute: "Inbox | TFN Admin" } };
 const DONE: Record<string, string> = { replied: "Reply saved to the conversation.", saved: "Updated.", incident: "Logged as an incident. The channels team can see it." };
 
 export default async function Inbox({ searchParams }: { searchParams: Promise<{ tab?: string; id?: string; done?: string }> }) {
-  const me = await requireAdmin();
+  const me = await requireAdmin(CAN.inbox);
   const sp = await searchParams;
   await db();
   const tab = ["unassigned", "mine", "closed"].includes(sp.tab || "") ? sp.tab! : "all";

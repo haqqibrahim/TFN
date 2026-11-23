@@ -63,7 +63,8 @@ export default async function Events({ searchParams }: { searchParams: Promise<{
 
   const all = await EventRegistration.find({ event: ev._id }).sort({ name: 1 }).lean();
   const q = (sp.q || "").toLowerCase();
-  const rows = all.filter((r) =>
+  const canSeePeople = allowed(me.role, "inbox");
+  const rows = !canSeePeople ? [] : all.filter((r) =>
     (!q || `${r.name} ${r.email} ${r.institution}`.toLowerCase().includes(q)) &&
     (sp.filter === "in" ? r.attendance === "In person" : sp.filter === "online" ? r.attendance === "Online" : sp.filter === "access" ? !!r.access : sp.filter === "here" ? r.checkedIn : true));
   const inPerson = all.filter((r) => r.attendance === "In person").length;
@@ -128,7 +129,7 @@ export default async function Events({ searchParams }: { searchParams: Promise<{
         {canManage && <a href={`/api/admin/export/attendees?event=${ev._id}`} className="btn btn-sm btn-line"><Icon name="download" size={17} /> Export</a>}
       </div>
 
-      <Table head={["Name", "Institution", "Attending", "Access needs", "Check-in"]} empty={rows.length ? undefined : all.length ? "No one matches." : "No one has registered yet."}>
+      <Table head={["Name", "Institution", "Attending", "Access needs", "Check-in"]} empty={rows.length ? undefined : !canSeePeople ? "Your role can see totals, but not attendee details." : all.length ? "No one matches." : "No one has registered yet."}>
         {rows.map((r) => (
           <tr key={String(r._id)}>
             <td><span className="font-semibold block">{r.name}</span><span className="text-[13px] text-muted">{r.email}</span></td>

@@ -8,6 +8,11 @@ import { LogoMark } from "@/components/logo";
 import { signOut } from "@/lib/auth-actions";
 import { initials } from "@/lib/format";
 
+const STUDENTS: { href: string; label: string; icon: IconName }[] = [
+  { href: "/admin/students", label: "Insights", icon: "grid" },
+  { href: "/admin/students/records", label: "Records", icon: "users" },
+];
+
 const ITEMS: { href: string; label: string; icon: IconName; badge?: "opportunities" | "channels" | "inbox" }[] = [
   { href: "/admin", label: "Dashboard", icon: "grid" },
   { href: "/admin/content", label: "Content", icon: "file" },
@@ -29,7 +34,7 @@ export function AdminNav({ me, badges }: { me: { name: string; role: string }; b
     <>
       <nav aria-label="Admin" className="flex-1">
         <ul className="grid gap-1">
-          {ITEMS.map((it) => (
+          {ITEMS.filter((it) => me.role !== "Viewer" || !["/admin/registrations", "/admin/inbox", "/admin/users"].includes(it.href)).map((it) => (
             <li key={it.href}>
               <Link
                 href={it.href}
@@ -47,6 +52,19 @@ export function AdminNav({ me, badges }: { me: { name: string; role: string }; b
             </li>
           ))}
         </ul>
+        <p className="px-4 pt-5 pb-1 text-[13px] font-semibold text-muted">Students</p>
+        <ul className="grid gap-1">
+          {STUDENTS.map((it) => {
+            const on = path === it.href;
+            return (
+              <li key={it.href}>
+                <Link href={it.href} aria-current={on ? "page" : undefined} className={`flex items-center gap-3 rounded-full px-4 min-h-11 text-[15px] font-medium transition-colors ${on ? "bg-navy text-cream" : "hover:bg-admin"}`}>
+                  <Icon name={it.icon} size={19} /> {it.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
       <div className="mt-6 pt-5 border-t border-adminline grid gap-1">
         <div className="flex items-center gap-3 px-2 pb-3">
@@ -56,6 +74,7 @@ export function AdminNav({ me, badges }: { me: { name: string; role: string }; b
             <span className="block text-[13px] text-muted">{me.role === "Super admin" ? "Super administrator" : me.role}</span>
           </span>
         </div>
+        <Link href="/admin/present" className="btn btn-coral mb-2"><Icon name="eye" size={18} /> Present</Link>
         <Link href="/admin/password" className="flex items-center gap-3 rounded-full px-4 min-h-11 text-[15px] hover:bg-admin">
           <Icon name="key" size={19} /> Change password
         </Link>

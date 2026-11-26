@@ -109,6 +109,15 @@ export function XLogo({ size = 24 }: { size?: number }) {
   );
 }
 
+export function YouTubeLogo({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="12" fill="#FF0000" />
+      <path d="M10 8.6v6.8l5.6-3.4z" fill="#FFFFFF" />
+    </svg>
+  );
+}
+
 export function LinkedInLogo({ size = 24 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">

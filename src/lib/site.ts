@@ -10,9 +10,11 @@ export const SITE = {
   /** The community links are gated: these send people to the sign-up form first. */
   whatsapp: "/join?channel=WhatsApp#register",
   telegram: "/join?channel=Telegram#register",
-  x: "https://x.com/tfnetwork",
-  linkedin: "https://www.linkedin.com/company/tfnetwork",
-  instagram: "https://www.instagram.com/tfnetwork",
+  x: "https://x.com/tfnetworkng",
+  /** Empty until the real page is supplied; empty links are hidden. */
+  linkedin: "",
+  instagram: "https://www.instagram.com/tertiaryfuturesnetwork/",
+  youtube: "https://www.youtube.com/@tertiaryfuturesnetwork",
   email: "info@tfnetwork.org",
   phone: "+234 803 555 0142",
   address: ["14 Aminu Kano Crescent", "Wuse II, Abuja"],

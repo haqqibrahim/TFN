@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
-import { Arrow, InstagramLogo, LinkedInLogo, TelegramLogo, WhatsAppLogo, XLogo } from "./icons";
+import { Arrow, InstagramLogo, LinkedInLogo, TelegramLogo, WhatsAppLogo, XLogo, YouTubeLogo } from "./icons";
 
 /**
  * Pill buttons for the two official channels. Without `links` they go to the sign-up form,
@@ -45,7 +45,8 @@ export function SocialLinks({ size = 44 }: { size?: number }) {
     { href: SITE.x, label: "TFN on X", Logo: XLogo, inside: false },
     { href: SITE.linkedin, label: "TFN on LinkedIn", Logo: LinkedInLogo },
     { href: SITE.instagram, label: "TFN on Instagram", Logo: InstagramLogo },
-  ];
+    { href: SITE.youtube, label: "TFN on YouTube", Logo: YouTubeLogo },
+  ].filter((i) => i.href);
   return (
     <ul className="flex flex-wrap gap-2.5">
       {items.map(({ href, label, Logo, inside }) => (

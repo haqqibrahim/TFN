@@ -1,5 +1,8 @@
 import type { IconName } from "@/components/icons";
 
+/** Public address of the live site. SITE_URL overrides it (e.g. for previews). */
+export const SITE_URL = (process.env.SITE_URL || "https://tertiaryfuturesnetwork.org").replace(/\/$/, "");
+
 export const SITE = {
   name: "Tertiary Futures Network",
   short: "TFN",

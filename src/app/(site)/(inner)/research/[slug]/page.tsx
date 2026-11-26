@@ -9,6 +9,7 @@ import { fmtDate } from "@/lib/format";
 import { headings, renderMarkdown } from "@/lib/markdown";
 import { publicationBySlug, publications } from "@/lib/queries";
 import { slugify } from "@/lib/format";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 60;
 
@@ -132,7 +133,7 @@ export default async function PublicationPage({ params }: { params: Promise<{ sl
           </section>
           <section id="cite" className="card p-5 scroll-mt-6" aria-labelledby="cite-h">
             <h2 id="cite-h" className="text-[20px] mb-3">Cite this</h2>
-            <Cite title={p.title} authors={p.authors} year={year} url={`${process.env.SITE_URL || "https://tfnetwork.org"}/research/${p.slug}`} />
+            <Cite title={p.title} authors={p.authors} year={year} url={`${SITE_URL}/research/${p.slug}`} />
           </section>
         </aside>
       </div>

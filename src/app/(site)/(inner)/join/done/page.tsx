@@ -5,6 +5,7 @@ import { CopyButton } from "@/components/copy-button";
 import { Icon, WhatsAppLogo } from "@/components/icons";
 import { deleteJoinAction } from "@/lib/actions";
 import { communityLinks, currentMember } from "@/lib/member";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = { title: "You’re registered", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -40,7 +41,7 @@ export default async function JoinDone() {
           <h2 id="share" className="text-[28px]">Bring your coursemates</h2>
           <p className="mt-2 text-muted">Share the join page. They’ll get the links once they register.</p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <a className="btn btn-line !pl-2.5" target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${shareText}${encodeURIComponent((process.env.SITE_URL || "https://tfnetwork.org") + "/join")}`}>
+            <a className="btn btn-line !pl-2.5" target="_blank" rel="noopener noreferrer" href={`https://wa.me/?text=${shareText}${encodeURIComponent(SITE_URL + "/join")}`}>
               <WhatsAppLogo size={30} /> Share on WhatsApp
             </a>
             <CopyButton text="/join" absolute label="Copy join link" done="Join link copied" />

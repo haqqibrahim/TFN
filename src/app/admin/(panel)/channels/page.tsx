@@ -179,7 +179,7 @@ export default async function Channels({ searchParams }: { searchParams: Promise
 function PostEditor({ p, canApprove }: { p: any; canApprove: boolean }) {
   const id = p._id ? String(p._id) : "";
   const checks = [
-    "Links go to tfnetwork.org or an official partner site",
+    "Links go to tertiaryfuturesnetwork.org or an official partner site",
     "No request for money, passwords or bank details",
     "Dates, times and places match the website",
   ];

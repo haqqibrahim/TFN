@@ -1,4 +1,5 @@
 import { eventBySlug } from "@/lib/queries";
+import { SITE_URL } from "@/lib/site";
 
 function ics(d: string | Date) {
   return new Date(d).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
@@ -11,13 +12,13 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
   const { slug } = await params;
   const e = await eventBySlug(slug);
   if (!e) return new Response("Not found", { status: 404 });
-  const site = process.env.SITE_URL || "https://tfnetwork.org";
+  const site = SITE_URL;
   const body = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Tertiary Futures Network//Events//EN",
     "BEGIN:VEVENT",
-    `UID:${e._id}@tfnetwork.org`,
+    `UID:${e._id}@tertiaryfuturesnetwork.org`,
     `DTSTAMP:${ics(new Date())}`,
     `DTSTART:${ics(e.startsAt)}`,
     `DTEND:${ics(e.endsAt || new Date(new Date(e.startsAt).getTime() + 2 * 3600000))}`,

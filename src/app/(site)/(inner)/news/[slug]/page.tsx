@@ -7,7 +7,7 @@ import { Arrow, WhatsAppLogo } from "@/components/icons";
 import { fmtDate } from "@/lib/format";
 import { renderMarkdown } from "@/lib/markdown";
 import { latestPosts, postBySlug } from "@/lib/queries";
-import { programmeByName } from "@/lib/site";
+import { programmeByName, SITE_URL } from "@/lib/site";
 
 export const revalidate = 60;
 
@@ -27,7 +27,7 @@ export default async function Article({ params }: { params: Promise<{ slug: stri
   if (!n) notFound();
   const related = await latestPosts({ limit: 2, exclude: slug });
   const prog = n.programme ? programmeByName(n.programme) : undefined;
-  const url = `${process.env.SITE_URL || "https://tfnetwork.org"}/news/${n.slug}`;
+  const url = `${SITE_URL}/news/${n.slug}`;
 
   return (
     <>
